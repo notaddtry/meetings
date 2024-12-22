@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  chat_id INT UNIQUE NOT NULL,
+  name VARCHAR(255),
+  email VARCHAR(255),
+  phone VARCHAR(20)
+);
