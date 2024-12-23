@@ -6,9 +6,9 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "node-telegram-bot-api": "^0.66.0",
     "officegen": "^0.6.5",
-    "pg": "^8.13.1",
-    "telebot": "^1.4.1"
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
