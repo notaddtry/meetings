@@ -1,16 +1,20 @@
 {
   "scripts": {
     "dev": "nodemon ./index.js",
+    "redis": "redis-server.exe",
     "db:create": "psql -U postgres -c \"DROP DATABASE meetings WITH (FORCE);\" -c \"CREATE DATABASE meetings;",
     "db:build": "npm run db:create && node ./db/build.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "node-telegram-bot-api": "^0.66.0",
     "officegen": "^0.6.5",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "redis": "^4.7.0"
   },
   "devDependencies": {
+    "concurrently": "^9.1.0",
     "nodemon": "^3.1.9"
   },
   "type": "commonjs"

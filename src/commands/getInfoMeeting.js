@@ -41,7 +41,7 @@ const getInfoMeeting = () => {
           //TODO DEBUGGING
           setTimeout(() => {
             bot
-              .sendDocument(chatId, path.join(__dirname, '../example.docx'))
+              .sendDocument(chatId, path.join(__dirname, '../../example.docx'))
               .then(() => {
                 // TODO AFTER TESTING fs.unlinkSync(path.join(__dirname, 'example.docx'))
               })

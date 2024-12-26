@@ -1,94 +1,37 @@
 require('dotenv').config()
-const TelegramBot = require('node-telegram-bot-api')
+const express = require('express')
 const pool = require('./db/pool.js')
-const fs = require('fs')
-const officegen = require('officegen')
-const path = require('path')
 const { initBot } = require('./src/bot.js')
 const setCommands = require('./src/commands/setCommands.js')
-// const bot = new TelegramBot(process.env.TG_TOKEN, { polling: true })
+const redisClient = require('./redis/redis.js')
 
-// bot.on('text', async (msg) => {
-//   const text = msg.text.toLowerCase()
+const app = express()
+const PORT = process.env.PORT || 5432
 
-//   if (text.includes('/start')) {
-//     console.log(msg)
-//     await msg.reply.text(
-//       'Привет! Я помогу тебе заполнить шаблон в LibreOffice. Введи свои данные в следующем порядке: Имя, Email, Телефон.'
-//     )
-//   } else {
-//     const data = text.split(',')
+// Используй try-catch для обработки ошибок
 
-//     if (data.length === 3) {
-//       try {
-//         async function generateDocument() {
-//           let docx = officegen('docx')
+async function start() {
+  try {
+    app.listen(PORT, () => console.log(`hello,worlds from ${PORT}`))
 
-//           docx.on('finalize', function (written) {
-//             console.log('Finish to create a Microsoft Word document.')
-//           })
+    await pool.connect()
 
-//           docx.on('error', function (err) {
-//             console.log(err)
-//           })
+    initBot()
+    setCommands()
 
-//           let pObj = docx.createP()
+    await redisClient.connect()
 
-//           pObj.addText(`Имя: ${data[0].trim()}\n`)
-//           pObj.addText(`Email: ${data[1].trim()}\n`)
-//           pObj.addText(`Телефон: ${data[2].trim()}`)
+    redisClient.on('error', (err) => {
+      console.error('Redis error:', err)
+    })
 
-//           if (fs.existsSync(path.join(__dirname, 'example.docx'))) {
-//             fs.unlinkSync(path.join(__dirname, 'example.docx'))
-//           }
+    redisClient.on('ready', () => {
+      console.log('Redis client is ready.')
+    })
+  } catch (e) {
+    console.log('Server error', e.message)
+    return
+  }
+}
 
-//           out = fs.createWriteStream('example.docx')
-
-//           out.on('error', function (err) {
-//             console.log(err)
-//           })
-
-//           docx.generate(out)
-//         }
-
-//         generateDocument()
-//           .then(() => {
-//             bot.sendMessage(msg.chat.id, 'asdasd')
-
-//             setTimeout(() => {
-//               bot
-//                 .sendDocument(msg.chat.id, path.join(__dirname, 'example.docx'))
-//                 .then(() => {
-//                   // TODO AFTER TESTING fs.unlinkSync(path.join(__dirname, 'example.docx'))
-//                 })
-//                 .catch((error) => {
-//                   console.log(error)
-//                   console.error(error)
-//                   msg.reply.text(
-//                     'Произошла ошибка при отправке документа. Попробуйте позже.'
-//                   )
-//                 })
-//             }, 1000)
-//           })
-//           .catch((error) => {
-//             console.error(error)
-//             msg.reply.text(
-//               'Произошла ошибка при создании документа. Попробуйте позже.'
-//             )
-//           })
-//       } catch (error) {
-//         console.error(error)
-//         await msg.reply.text(
-//           'Произошла ошибка при сохранении данных. Попробуйте ещё раз.'
-//         )
-//       }
-//     } else {
-//       await msg.reply.text(
-//         'Введите данные в правильном формате: Имя, Email, Телефон.'
-//       )
-//     }
-//   }
-// })
-
-initBot()
-setCommands()
+start()
