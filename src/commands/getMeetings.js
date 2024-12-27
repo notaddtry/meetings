@@ -9,22 +9,20 @@ const getMeetings = () => {
     const worker = await pool.query(`
       SELECT * FROM worker WHERE username = '${username}';
       `)
-    const meeting_worker_array = await pool.query(`
-      SELECT * FROM meeting_worker_relationship WHERE worker_id = '${worker.rows[0].id}';
+
+    const teamsWorker = await pool.query(`
+      SELECT * FROM worker_team_role WHERE worker_id = '${worker.rows[0].id}';
       `)
 
-    let meetings = []
+    const teamsWorkerId = teamsWorker.rows.map(
+      (teamWorker) => teamWorker.team_id
+    )
 
-    for (const meeting_worker of meeting_worker_array.rows) {
-      const meeting = await pool.query(`
-        SELECT * FROM meeting WHERE id = ${meeting_worker.meeting_id} AND date > NOW();
-        `)
-      if (meeting.rows[0]) {
-        meetings.push(meeting.rows[0])
-      }
-    }
+    const meetings = await pool.query(`
+      SELECT * FROM meeting WHERE team_id = ANY(ARRAY[${teamsWorkerId}]) AND date > NOW();
+      `)
 
-    const message = meetings
+    const message = meetings.rows
       .map((meeting) => {
         return `    Идентификатор встречи: ${meeting.id}
     Дата встречи: ${new Date(meeting.date).toLocaleString()}

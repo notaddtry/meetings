@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5432
 
 async function start() {
   try {
-    app.listen(PORT, () => console.log(`hello,worlds from ${PORT}`))
+    app.listen(PORT, () => console.info(`hello,worlds from ${PORT}`))
 
     await pool.connect()
 
@@ -26,10 +26,10 @@ async function start() {
     })
 
     redisClient.on('ready', () => {
-      console.log('Redis client is ready.')
+      console.info('Redis client is ready.')
     })
   } catch (e) {
-    console.log('Server error', e.message)
+    console.error('Server error', e.message)
     return
   }
 }

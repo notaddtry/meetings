@@ -1,8 +1,3 @@
--- Создаем базу данных
--- CREATE DATABASE IF NOT EXISTS meetings;
--- \connect meetings;
-
--- Очищаем таблицу 'Worker' перед созданием новой структуры
 DROP TABLE IF EXISTS worker CASCADE;
 
 -- Создаем таблицу 'Worker'
@@ -93,7 +88,8 @@ CREATE TYPE Type_Meeting AS ENUM ('Online', 'Offline');
 CREATE TABLE meeting (
     id SERIAL PRIMARY KEY,
     date TIMESTAMP,
-    type Type_Meeting
+    type Type_Meeting,
+    team_id INT REFERENCES team(id) ON DELETE CASCADE
 );
 
 -- Индексируем поле date для ускорения поиска по дате встречи
@@ -125,12 +121,12 @@ CREATE TABLE mark (
 -- Очищаем таблицу 'Meeting_Worker_Relationship' перед созданием новой структуры
 DROP TABLE IF EXISTS meeting_worker_relationship CASCADE;
 
--- Создаем таблицу 'Meeting_Worker_Relationship'
-CREATE TABLE meeting_worker_relationship (
-    id SERIAL PRIMARY KEY,
-    meeting_id INT REFERENCES meeting(id) ON DELETE CASCADE,
-    worker_id INT REFERENCES worker(id) ON DELETE CASCADE
-);
+-- -- Создаем таблицу 'Meeting_team_Relationship'
+-- CREATE TABLE meeting_team_relationship (
+--     id SERIAL PRIMARY KEY,
+--     meeting_id INT REFERENCES meeting(id) ON DELETE CASCADE,
+--     team_id INT REFERENCES team(id) ON DELETE CASCADE
+-- );
 
 CREATE OR REPLACE FUNCTION create_team_function(
     in_title VARCHAR(255),
@@ -160,11 +156,12 @@ BEGIN
 END;
 
 $$ LANGUAGE plpgsql;
+
 -- Создаем функцию для создания собрания
 CREATE OR REPLACE FUNCTION create_meeting_function(
     in_date TIMESTAMP,
     in_type Type_Meeting,
-    in_participants INT[] -- Список участников
+    in_team_id INT
 ) RETURNS INT AS
 
 $$
@@ -172,12 +169,12 @@ DECLARE
     new_meeting_id INT;
 BEGIN
     -- Создаем новую встречу
-    INSERT INTO meeting(date, type)
-    VALUES(in_date, in_type)
+    INSERT INTO meeting(date, type, team_id)
+    VALUES(in_date, in_type, in_team_id)
     RETURNING id INTO new_meeting_id;
 
-    -- Привязываем участников к встрече
-    CALL add_workers_to_meeting(new_meeting_id, in_participants);
+    -- -- Привязываем команду к встрече
+    -- CALL add_team_to_meeting(new_meeting_id, in_team_id);
 
     RETURN new_meeting_id;
 END;
@@ -227,36 +224,33 @@ END;
 
 $$ LANGUAGE plpgsql;
 
--- Создаем процедуру для привязки участников к собранию
-CREATE OR REPLACE PROCEDURE add_workers_to_meeting(
-    in_meeting_id INT,
-    in_worker_ids INT[]
-)
-LANGUAGE plpgsql
-AS
+-- -- Создаем процедуру для привязки команды к собранию
+-- CREATE OR REPLACE PROCEDURE add_team_to_meeting(
+--     in_meeting_id INT,
+--     in_team_id INT
+-- )
+-- LANGUAGE plpgsql
+-- AS
 
-$$
-DECLARE
-    w_id INT;
-BEGIN
-    FOREACH w_id IN ARRAY in_worker_ids LOOP
-        -- Проверяем, существует ли связь в таблице meeting_worker_relationship
-        IF NOT EXISTS (SELECT 1 FROM meeting_worker_relationship WHERE meeting_id = in_meeting_id AND worker_id = w_id) THEN
-            -- Связи нет, добавляем её
-            INSERT INTO meeting_worker_relationship(meeting_id, worker_id)
-            VALUES(in_meeting_id, w_id);
-        END IF;
-    END LOOP;
-END;
+-- $$
+-- BEGIN
+--     -- Проверяем, существует ли связь в таблице meeting_team_relationship
+--     IF NOT EXISTS (SELECT 1 FROM meeting_team_relationship WHERE meeting_id = in_meeting_id AND team_id = in_team_id) THEN
+--         -- Связи нет, добавляем её
+--         INSERT INTO meeting_team_relationship(meeting_id, team_id)
+--         VALUES(in_meeting_id, in_team_id);
+--     END IF;
+-- END;
 
-$$;
+-- $$;
 
 
 -- Данные для таблицы worker
 INSERT INTO worker(username, email)
 VALUES
 ('notaddtry', 'comatose.7777@mail.ru'),
-('john doe', 'comatose.9999@mail.ru');
+('john doe', 'comatose.9999@mail.ru'),
+('comatose', 'comatose.6666@gmail.com');
 
 INSERT INTO leader(worker_id)
 VALUES
@@ -294,10 +288,16 @@ SELECT create_team_function('Development Team', (SELECT id FROM leader WHERE wor
 
 -- Добавляем участников в команду
 SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'john doe'), (SELECT id FROM role WHERE title = 'Worker'));
+SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'comatose'), (SELECT id FROM role WHERE title = 'Responsible'));
 
 -- Создаём встречи и привязываем участников
-SELECT create_meeting_function('2023-09-20 14:00:00', 'Online', ARRAY[(SELECT id FROM worker WHERE username = 'notaddtry'), (SELECT id FROM worker WHERE username = 'john doe')]) AS meeting_id;
-SELECT create_meeting_function('2025-09-20 14:00:00', 'Offline', ARRAY[(SELECT id FROM worker WHERE username = 'notaddtry'), (SELECT id FROM worker WHERE username = 'john doe')]) AS meeting_id;
+SELECT create_meeting_function('2023-09-20 14:00:00', 'Online', (SELECT id FROM team WHERE title = 'Development Team')) AS meeting_id;
+SELECT create_meeting_function('2025-09-20 14:00:00', 'Offline', (SELECT id FROM team WHERE title = 'Development Team')) AS meeting_id;
+
+-- Таблица mark
+INSERT INTO mark (meeting_id, worker_id, can_be_in_meeting)
+VALUES
+(1, 2, TRUE);
 
 -- Завершаем создание базы данных
 -- COMMIT;
