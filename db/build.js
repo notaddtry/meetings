@@ -5,10 +5,10 @@ const sqlQuery = fs.readFileSync('./db/build.sql', 'utf-8')
 
 connection.query(sqlQuery, (err) => {
   if (err) {
-    console.log(err)
+    console.error(err)
     return
   }
-  console.log('Database built successfully')
+  console.info('Database built successfully')
 })
 
 connection.end()

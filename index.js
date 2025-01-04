@@ -1,8 +1,8 @@
 require('dotenv').config()
 const express = require('express')
 const pool = require('./db/pool.js')
-const { initBot } = require('./src/bot.js')
-const setCommands = require('./src/commands/setCommands.js')
+const { initBot } = require('./src/bot/bot.js')
+const setCommands = require('./src/bot/commands/setCommands.js')
 const redisClient = require('./redis/redis.js')
 
 const app = express()
@@ -15,19 +15,10 @@ async function start() {
     app.listen(PORT, () => console.info(`hello,worlds from ${PORT}`))
 
     await pool.connect()
+    await redisClient.connect()
 
     initBot()
     setCommands()
-
-    await redisClient.connect()
-
-    redisClient.on('error', (err) => {
-      console.error('Redis error:', err)
-    })
-
-    redisClient.on('ready', () => {
-      console.info('Redis client is ready.')
-    })
   } catch (e) {
     console.error('Server error', e.message)
     return

@@ -1,7 +1,9 @@
 const redis = require('redis')
+require('dotenv').config()
 
 const redisClient = redis.createClient({
-  url: 'redis://127.0.0.1:6379',
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
 })
 
 module.exports = redisClient

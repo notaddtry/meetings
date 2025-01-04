@@ -4,7 +4,8 @@ DROP TABLE IF EXISTS worker CASCADE;
 CREATE TABLE worker (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) UNIQUE
+    email VARCHAR(255) UNIQUE,
+    chat_id BIGINT UNIQUE
 );
 
 -- Индексируем поле username для ускорения поиска по логину телеграма
@@ -246,12 +247,12 @@ $$ LANGUAGE plpgsql;
 
 
 -- Данные для таблицы worker
-INSERT INTO worker(username, email)
+INSERT INTO worker(username, email, chat_id)
 VALUES
-('notaddtry', 'comatose.7777@mail.ru'),
-('john doe', 'comatose.9999@mail.ru'),
-('comatose', 'comatose.6666@gmail.com');
-
+('notaddtry', 'comatose.7777@mail.ru', 229820673),
+('meeting_test_1', 'comatose9999@proton.me', 7632038593);
+-- ('comatose', 'comatose.6666@gmail.com', 763203859376320);
+ 
 INSERT INTO leader(worker_id)
 VALUES
 ((SELECT id FROM worker WHERE username = 'notaddtry'));
@@ -287,8 +288,8 @@ VALUES
 SELECT create_team_function('Development Team', (SELECT id FROM leader WHERE worker_id = (SELECT id FROM worker WHERE username = 'notaddtry'))) AS team_id;
 
 -- Добавляем участников в команду
-SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'john doe'), (SELECT id FROM role WHERE title = 'Worker'));
-SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'comatose'), (SELECT id FROM role WHERE title = 'Responsible'));
+SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'meeting_test_1'), (SELECT id FROM role WHERE title = 'Worker'));
+-- SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'comatose'), (SELECT id FROM role WHERE title = 'Responsible'));
 
 -- Создаём встречи и привязываем участников
 SELECT create_meeting_function('2023-09-20 14:00:00', 'Online', (SELECT id FROM team WHERE title = 'Development Team')) AS meeting_id;

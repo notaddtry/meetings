@@ -1,18 +1,25 @@
-const { bot } = require('../bot.js')
-const { setUserState } = require('../../redis/utils.js')
-const pool = require('../../db/pool.js')
+const { bot } = require('./../bot.js')
+const { setUserState } = require('../../../redis/utils.js')
+const pool = require('../../../db/pool.js')
+const { isWorkerRegistered } = require('./utils.js')
+const { selectWorkerByUsername } = require('../../../db/seletors.js')
 
 const createMeeting = () => {
   bot.onText('/create_meeting', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username
 
-    const worker = await pool.query(`
-      SELECT * FROM worker WHERE username = '${username}'
-      `)
+    if (!(await isWorkerRegistered(username))) {
+      return await bot.sendMessage(
+        chatId,
+        'Для начала работы пройдите регистрацию. Команда /start'
+      )
+    }
+
+    const worker = await selectWorkerByUsername(username)
 
     const isWorkerLeader = await pool.query(`
-      SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id}
+      SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
       `)
 
     if (!isWorkerLeader.rows.length) {

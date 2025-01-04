@@ -4,6 +4,7 @@ const getMeetings = require('./getMeetings.js')
 const createTeam = require('./createTeam.js')
 const messageHandler = require('./messageHandler.js')
 const createMeeting = require('./createMeeting.js')
+const setMark = require('./setMark.js')
 
 const setCommands = () => {
   start()
@@ -11,6 +12,7 @@ const setCommands = () => {
   getMeetings()
   createTeam()
   createMeeting()
+  setMark()
 
   messageHandler()
 }
