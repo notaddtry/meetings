@@ -8,8 +8,6 @@ const redisClient = require('./redis/redis.js')
 const app = express()
 const PORT = process.env.PORT || 5432
 
-// Используй try-catch для обработки ошибок
-
 async function start() {
   try {
     app.listen(PORT, () => console.info(`hello,worlds from ${PORT}`))

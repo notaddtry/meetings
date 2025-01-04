@@ -23,8 +23,6 @@ function isDateValid(dateStr) {
   return !isNaN(new Date(dateStr))
 }
 
-// let messagesState = {}
-
 const messageHandler = () => {
   bot.on('message', async (msg) => {
     const chatId = msg.chat.id
