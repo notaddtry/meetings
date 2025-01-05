@@ -35,6 +35,10 @@ jobs:
           echo "organization variable: $ORGANIZATION_VAR"
           echo "overridden variable: $OVERRIDE_VAR"
           echo "variable from shell environment: $env_var"
+        env:
+          REPOSITORY_VAR: ${{ vars.PORT }}
+          ORGANIZATION_VAR: ${{ vars.ORGANIZATION_VAR }}
+          OVERRIDE_VAR: ${{ vars.OVERRIDE_VAR }}
       - name: install modules
         run: npm install
       - name: start project
