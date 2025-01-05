@@ -29,21 +29,12 @@ jobs:
       # - name: Build the stack
       #   run: docker compose --env-file .env up
       - name: 'Create env file'
+
         run: |
-          touch .env 
-          echo PORT=${{ env.PORT }} >> .env
-          echo DB_USER=${{ env.DB_USER }} >> .env
-          echo DEV_HOST=${{ env.DEV_HOST }} >> .env
-          echo PROD_HOST_DB=${{ env.PROD_HOST_DB }} >> .env
-          echo DB_NAME=${{ env.DB_NAME }} >> .env
-          echo DB_PASSWORD=${{ env.DB_PASSWORD }} >> .env
-          echo DB_PORT=${{ env.DB_PORT }} >> .env
-          echo PROD_HOST_REDIS=${{ env.PROD_HOST_REDIS }} >> .env
-          echo REDIS_PORT=${{ env.REDIS_PORT }} >> .env
-          echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
-          echo MAIL_TOKEN=${{ secrets.MAIL_TOKEN }} >> .env
-          echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
-          cat .env
+          echo "repository variable: $REPOSITORY_VAR"
+          echo "organization variable: $ORGANIZATION_VAR"
+          echo "overridden variable: $OVERRIDE_VAR"
+          echo "variable from shell environment: $env_var"
       - name: install modules
         run: npm install
       - name: start project
