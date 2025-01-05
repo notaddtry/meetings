@@ -4,18 +4,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-env:
-  PORT: ${{ vars.PORT }}
-  DB_USER: ${{ vars.DB_USER }}
-  DEV_HOST: ${{ vars.DEV_HOST }}
-  PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-  DB_NAME: ${{ vars.DB_NAME }}
-  DB_PASSWORD: ${{ vars.DB_PASSWORD }}
-  DB_PORT: ${{ vars.DB_PORT }}
-  PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
-  REDIS_PORT: ${{ vars.REDIS_PORT }}
-  env_var: ${{ vars.PORT }}
-  DAY_OF_WEEK: Monday
 
 jobs:
   display-variables:
@@ -24,11 +12,14 @@ jobs:
     # You can use configuration variables with the `vars` context for dynamic jobs
     steps:
       - name: Use variables
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
         run: |
           echo "repository variable : $DAY_OF_WEEK"
           echo "organization variable : $env_var"
           echo "overridden variable : ${{ vars.PORT }}"
           echo ${{ secrets.TG_TOKEN }} 
+          echo $TG_TOKEN
           echo "variable from shell environment : $env_var"
 
   init:
