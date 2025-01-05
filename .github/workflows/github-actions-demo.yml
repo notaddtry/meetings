@@ -18,15 +18,18 @@ env:
   DAY_OF_WEEK: Monday
 
 jobs:
-  greeting_job:
+  display-variables:
     runs-on: ubuntu-latest
-    env:
-      Greeting: Hello
+    name: display-variables
+    # You can use configuration variables with the `vars` context for dynamic jobs
     steps:
-      - name: "Say Hello Mona it's Monday"
-        run: echo "$Greeting $First_Name. Today is $DAY_OF_WEEK!"
-        env:
-          First_Name: Mona
+      - name: Use variables
+        run: |
+          echo "repository variable : $DAY_OF_WEEK"
+          echo "organization variable : $env_var"
+          echo "overridden variable : $PORT"
+          echo "variable from shell environment : $env_var"
+
   init:
     runs-on: ubuntu-latest
     strategy:
