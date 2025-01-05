@@ -24,3 +24,5 @@ jobs:
         run: npm run test:unit
       - name: e2e test
         run: npm run test:integration
+      - name: Build the stack
+        run: docker compose --env-file .env up

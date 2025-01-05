@@ -1,4 +1,4 @@
-const transport = require('../mail/index.js')
+const transport = require('./index.js')
 
 const sendMail = (workersMail, state, team) => {
   const message = {

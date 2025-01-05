@@ -1,13 +1,16 @@
 {
+  "main": ".",
   "scripts": {
-    "dev": "nodemon ./index.js",
+    "dev": "nodemon .",
     "redis": "redis-server.exe",
+    "start": "NODE_ENV=prod node .",
     "db:create": "psql -U postgres -c \"DROP DATABASE meetings WITH (FORCE);\" -c \"CREATE DATABASE meetings;",
     "db:build": "npm run db:create && node ./db/build.js",
     "test:unit": "mocha **/unit/*test.js",
     "test:integration": "mocha **/integration/*test.js"
   },
   "dependencies": {
+    "docker": "^1.0.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-telegram-bot-api": "^0.66.0",
