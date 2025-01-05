@@ -21,9 +21,18 @@ jobs:
       - name: 'Create env file'
         run: |
           touch .env
-          echo ${{ secrets.TG_TOKEN }}
-          echo ${{ secrets.DB_USER }}
-          echo API_KEY=${{ secrets.API_KEY }} >> .env
+          echo PORT=${{ secrets.PORT }} >> .env
+          echo DB_USER=${{ secrets.DB_USER }} >> .env
+          echo DEV_HOST=${{ secrets.DEV_HOST }} >> .env
+          echo PROD_HOST_DB=${{ secrets.PROD_HOST_DB }} >> .env
+          echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+          echo DB_PORT=${{ secrets.DB_PORT=5432 }} >> .env
+          echo PROD_HOST_REDIS=${{ secrets.PROD_HOST_REDIS }} >> .env
+          echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> .env
+          echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
+          echo MAIL_TOKEN=${{ secrets.MAIL_TOKEN }} >> .env
+          echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
           cat .env
       - name: install modules
         run: npm install
