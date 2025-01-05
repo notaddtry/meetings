@@ -4,6 +4,19 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+env:
+  PORT: ${{ vars.PORT }}
+  DB_USER: ${{ vars.DB_USER }}
+  DEV_HOST: ${{ vars.DEV_HOST }}
+  PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+  DB_NAME: ${{ vars.DB_NAME }}
+  DB_PASSWORD: ${{ vars.DB_PASSWORD }}
+  DB_PORT: ${{ vars.DB_PORT }}
+  PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+  REDIS_PORT: ${{ vars.REDIS_PORT }}
+  MAIL_USER: ${{ secrets.MAIL_USER }}
+  MAIL_TOKEN: ${{ secrets.MAIL_TOKEN }}
+  TG_TOKEN: ${{ secrets.TG_TOKEN }}
 
 jobs:
   init:
@@ -31,13 +44,16 @@ jobs:
       #   DB_NAME: ${{ vars.DB_NAME }}
       #   DB_PASSWORD: ${{ vars.DB_PASSWORD }}
       #   DB_PORT: ${{ vars.DB_PORT }}
-      #   PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
-      #   REDIS_PORT: ${{ vars.REDIS_PORT }}
+      # PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+      # REDIS_PORT: ${{ vars.REDIS_PORT }}
       #   MAIL_USER: ${{ secrets.MAIL_USER }}
       #   MAIL_TOKEN: ${{ secrets.MAIL_TOKEN }}
       #   TG_TOKEN: ${{ secrets.TG_TOKEN }}
       # run: npm run start
       - name: unit test
         run: npm run test:unit
+        env:
+          PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+          REDIS_PORT: ${{ vars.REDIS_PORT }}
       - name: e2e test
         run: npm run test:integration
