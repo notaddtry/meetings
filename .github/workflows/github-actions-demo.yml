@@ -53,7 +53,7 @@ jobs:
           cat .env
 
       - name: Build the stack
-        run: docker compose --env-file ../.env up
+        run: docker compose up
 
       - name: install modules
         run: npm install
