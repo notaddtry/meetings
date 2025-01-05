@@ -58,6 +58,7 @@ jobs:
           DEV_HOST: ${{ vars.DEV_HOST }}
       - name: e2e test
         run: npm run test:integration
+          echo ${{ vars.DB_USER }}${{ vars.DEV_HOST }}${{ vars.PROD_HOST_DB }}${{ vars.DB_NAME }}${{ vars.DB_PASSWORD }}${{ vars.DB_PORT }}
         env:
           NODE_ENV: prod
           DB_USER: ${{ vars.DB_USER }}
