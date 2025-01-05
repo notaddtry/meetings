@@ -28,5 +28,5 @@ jobs:
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_TOKEN: ${{ secrets.MAIL_TOKEN }}
       - run: npm ci
-      - run: npm run build --if-present
+      - run: npm run build
       - run: npm test
