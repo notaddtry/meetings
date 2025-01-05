@@ -32,7 +32,8 @@ jobs:
 
         run: |
           echo "repository variable: $PORT"
-          echo "organization variable: $ORGANIZATION_VAR"
+          echo "repository variable s: ${{ vars.PORT }}"
+          echo "organization variable: $REPOSITORY_VAR"
           echo "overridden variable: $OVERRIDE_VAR"
           echo "variable from shell environment: $env_var"
         env:
