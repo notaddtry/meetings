@@ -21,15 +21,15 @@ jobs:
       - name: 'Create env file'
         run: |
           touch .env 
-          echo PORT=${{ vars.PORT }} >> .env
-          echo DB_USER=${{ vars.DB_USER }} >> .env
-          echo DEV_HOST=${{ vars.DEV_HOST }} >> .env
-          echo PROD_HOST_DB=${{ vars.PROD_HOST_DB }} >> .env
-          echo DB_NAME=${{ vars.DB_NAME }} >> .env
-          echo DB_PASSWORD=${{ vars.DB_PASSWORD }} >> .env
-          echo DB_PORT=${{ vars.DB_PORT }} >> .env
-          echo PROD_HOST_REDIS=${{ vars.PROD_HOST_REDIS }} >> .env
-          echo REDIS_PORT=${{ vars.REDIS_PORT }} >> .env
+          echo PORT=${{ env.PORT }} >> .env
+          echo DB_USER=${{ env.DB_USER }} >> .env
+          echo DEV_HOST=${{ env.DEV_HOST }} >> .env
+          echo PROD_HOST_DB=${{ env.PROD_HOST_DB }} >> .env
+          echo DB_NAME=${{ env.DB_NAME }} >> .env
+          echo DB_PASSWORD=${{ env.DB_PASSWORD }} >> .env
+          echo DB_PORT=${{ env.DB_PORT }} >> .env
+          echo PROD_HOST_REDIS=${{ env.PROD_HOST_REDIS }} >> .env
+          echo REDIS_PORT=${{ env.REDIS_PORT }} >> .env
           echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
           echo MAIL_TOKEN=${{ secrets.MAIL_TOKEN }} >> .env
           echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
