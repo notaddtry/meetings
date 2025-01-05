@@ -41,15 +41,15 @@ jobs:
         run: npm install
       - name: start project
         env:
-          PORT: ${{ env.PORT }}
-          DB_USER: ${{ env.DB_USER }}
-          DEV_HOST: ${{ env.DEV_HOST }}
-          PROD_HOST_DB: ${{ env.PROD_HOST_DB }}
-          DB_NAME: ${{ env.DB_NAME }}
-          DB_PASSWORD: ${{ env.DB_PASSWORD }}
-          DB_PORT: ${{ env.DB_PORT }}
-          PROD_HOST_REDIS: ${{ env.PROD_HOST_REDIS }}
-          REDIS_PORT: ${{ env.REDIS_PORT }}
+          PORT: ${{ vars.PORT }}
+          DB_USER: ${{ vars.DB_USER }}
+          DEV_HOST: ${{ vars.DEV_HOST }}
+          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_PASSWORD: ${{ vars.DB_PASSWORD }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+          REDIS_PORT: ${{ vars.REDIS_PORT }}
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_TOKEN: ${{ secrets.MAIL_TOKEN }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
