@@ -43,11 +43,11 @@ async function generateDocument(workerMarkMap, workers) {
     )
   })
 
-  if (fs.existsSync(path.join(__dirname, '../../example.docx'))) {
-    fs.unlinkSync(path.join(__dirname, '../../example.docx'))
+  if (fs.existsSync(path.join(__dirname, '../../../example.docx'))) {
+    fs.unlinkSync(path.join(__dirname, '../../../example.docx'))
   }
 
-  out = fs.createWriteStream(path.join(__dirname, '../../example.docx'))
+  out = fs.createWriteStream(path.join(__dirname, '../../../example.docx'))
 
   docx.generate(out)
 }
