@@ -20,7 +20,7 @@ jobs:
       #   run: docker compose --env-file .env up
       - name: 'Create env file'
         run: |
-          touch .env
+          touch .env 
           echo PORT=${{ secrets.PORT }} >> .env
           echo DB_USER=${{ secrets.DB_USER }} >> .env
           echo DEV_HOST=${{ secrets.DEV_HOST }} >> .env
