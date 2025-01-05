@@ -16,11 +16,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Build the stack
-        run: docker compose --env-file .env up
+      # - name: Build the stack
+      #   run: docker compose --env-file .env up
       - name: install modules
         run: npm install
-      # - name: unit test
-      #   run: npm run test:unit
-      # - name: e2e test
-      #   run: npm run test:integration
+      - name: unit test
+        run: npm run test:unit
+      - name: e2e test
+        run: npm run test:integration
