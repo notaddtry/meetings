@@ -37,7 +37,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build the stack
-        run: docker compose up
+        run: docker compose --env-file ../.env up
 
       - name: install modules
         run: npm install
