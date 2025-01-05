@@ -14,7 +14,26 @@ env:
   DB_PORT: ${{ vars.DB_PORT }}
   PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
   REDIS_PORT: ${{ vars.REDIS_PORT }}
+  env_var: ${{ vars.PORT }}
+
 jobs:
+  display-variables:
+    name: ${{ vars.JOB_NAME }}
+    # You can use configuration variables with the `vars` context for dynamic jobs
+    if: ${{ vars.USE_VARIABLES == 'true' }}
+    runs-on: ${{ vars.RUNNER }}
+    environment: ${{ vars.ENVIRONMENT_STAGE }}
+    steps:
+      - name: Use variables
+        run: |
+          echo "repository variable : $REPOSITORY_VAR"
+          echo "organization variable : $ORGANIZATION_VAR"
+          echo "overridden variable : $OVERRIDE_VAR"
+          echo "variable from shell environment : $env_var"
+        env:
+          REPOSITORY_VAR: ${{ vars.REPOSITORY_VAR }}
+          ORGANIZATION_VAR: ${{ vars.ORGANIZATION_VAR }}
+          OVERRIDE_VAR: ${{ vars.OVERRIDE_VAR }}
   init:
     runs-on: ubuntu-latest
     strategy:
@@ -28,18 +47,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       # - name: Build the stack
       #   run: docker compose --env-file .env up
-      - name: 'Create env file'
 
-        run: |
-          echo "repository variable: $PORT"
-          echo "repository variable s: ${{ vars.PORT }}"
-          echo "organization variable: $REPOSITORY_VAR"
-          echo "overridden variable: $OVERRIDE_VAR"
-          echo "variable from shell environment: $env_var"
-        env:
-          REPOSITORY_VAR: ${{ vars.PORT }}
-          ORGANIZATION_VAR: ${{ vars.ORGANIZATION_VAR }}
-          OVERRIDE_VAR: ${{ vars.OVERRIDE_VAR }}
       - name: install modules
         run: npm install
       - name: start project
