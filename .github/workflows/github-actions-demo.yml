@@ -27,7 +27,8 @@ jobs:
         run: |
           echo "repository variable : $DAY_OF_WEEK"
           echo "organization variable : $env_var"
-          echo "overridden variable : $PORT"
+          echo "overridden variable : ${{ vars.PORT }}"
+          echo ${{ secrets.TG_TOKEN }}
           echo "variable from shell environment : $env_var"
 
   init:
