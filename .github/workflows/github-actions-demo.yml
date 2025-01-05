@@ -55,5 +55,6 @@ jobs:
         env:
           PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
           REDIS_PORT: ${{ vars.REDIS_PORT }}
+          NODE_ENV: prod
       - name: e2e test
         run: npm run test:integration
