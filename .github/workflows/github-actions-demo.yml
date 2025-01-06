@@ -55,7 +55,7 @@ jobs:
           POSTGRES_DB: ${{ vars.POSTGRES_DB }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
-  run docker:
+  run_docker:
     runs-on: ubuntu-latest
     steps:
       - name: 'Create env file'
