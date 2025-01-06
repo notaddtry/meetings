@@ -38,6 +38,7 @@ jobs:
           sudo apt-get install --yes --no-install-recommends postgresql-client
       - name: build db
         run: npm run db:build
+        run: ls
         env:
           POSTGRES_USER: ${{ vars.POSTGRES_USER }}
           DEV_HOST: localhost
