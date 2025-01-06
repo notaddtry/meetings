@@ -60,6 +60,10 @@ jobs:
           POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
       # - name: start project
       #   run: npm run start
+      - name: Connect to PostgreSQL
+        # Runs a script that creates a PostgreSQL table, populates
+        # the table with data, and then retrieves the data.
+        run: node ./db/build.js
       - name: unit test
         run: npm run test:unit
         env:
