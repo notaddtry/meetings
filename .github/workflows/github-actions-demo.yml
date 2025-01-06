@@ -43,7 +43,7 @@ jobs:
       - name: build db
         run: sudo find /tmp/ -name .s.PGSQL.5432
       - name: build db
-        run: psql -U postgres -c \"DROP DATABASE meetings WITH (FORCE);\" -c \"CREATE DATABASE meetings;\"
+        run: psql -U postgres -c "DROP DATABASE meetings WITH (FORCE);" -c "CREATE DATABASE meetings;"
         env:
           POSTGRES_USER: ${{ vars.POSTGRES_USER }}
           DEV_HOST: localhost
