@@ -32,6 +32,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: install modules
         run: npm install
+      - name: install po
+        run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends postgresql-client
       - name: build db
         run: npm run db:build
       - name: start project
