@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "nodemon ./index.js",
     "redis": "redis-server.exe",
-    "start": "NODE_ENV=prod node .",
+    "start": "NODE_ENV=prod node ./index.js",
     "db:create": "psql -U postgres -c \"DROP DATABASE meetings WITH (FORCE);\" -c \"CREATE DATABASE meetings;",
     "db:build": "npm run db:create && node ./db/build.js",
     "test:unit": "mocha **/unit/*test.js --exit",
