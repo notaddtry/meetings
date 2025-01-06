@@ -4,6 +4,19 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+env:
+  PORT: ${{ vars.PORT }}
+  POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+  DEV_HOST: ${{ vars.DEV_HOST }}
+  PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+  POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+  POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+  POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
+  PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+  REDIS_PORT: ${{ vars.REDIS_PORT }}
+  MAIL_USER: ${{ secrets.MAIL_USER }}
+  MAIL_TOKEN: ${{ secrets.MAIL_TOKEN }}
+  TG_TOKEN: ${{ secrets.TG_TOKEN }}
 
 jobs:
   init:
@@ -15,9 +28,9 @@ jobs:
       postgres:
         image: postgres:10.10
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: meetings
+          POSTGRES_USER: $POSTGRES_USER
+          POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+          POSTGRES_DB: $POSTGRES_DB
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
@@ -40,7 +53,7 @@ jobs:
         #     sudo apt-get install --yes --no-install-recommends postgresql-client
         env:
           POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-          DEV_HOST: localhost
+          DEV_HOST: ${{ vars.DEV_HOST }}
           PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
           POSTGRES_DB: ${{ vars.POSTGRES_DB }}
           POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
