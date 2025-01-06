@@ -1,9 +1,11 @@
 name: cicd with actions
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
 env:
   PORT: ${{ vars.PORT }}
   POSTGRES_USER: ${{ vars.POSTGRES_USER }}
@@ -21,56 +23,45 @@ env:
 jobs:
   init:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         node-version: [18.x]
+
     services:
       postgres:
         image: postgres:10.10
+
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: meetings
+
         ports:
           - 5432:5432
+
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    env:
-      POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-      DEV_HOST: ${{ vars.DEV_HOST }}
-      PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-      POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-      POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
-      POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
-      PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
-      REDIS_PORT: ${{ vars.REDIS_PORT }}
+
     steps:
       - uses: actions/checkout@v3
 
-      # redis:
-      #   image: redis:latest
-      #   ports:
-      #     - 6379/tcp
       - name: Staring Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: install modules
         run: npm install
-        # - name: install po
-        #   run: |
-        #     sudo apt-get update
-        #     sudo apt-get install --yes --no-install-recommends postgresql-client
 
-      # - name: start project
-      #   run: npm run start
       - name: Connect to PostgreSQL
-        # Runs a script that creates a PostgreSQL table, populates
-        # the table with data, and then retrieves the data.
         run: node ./db/build.js
+
       - name: unit test
         run: npm run test:unit
+
       - name: e2e test
         run: npm run test:integration
+
       - name: stop postgres service
         run: |
           ids=$(docker ps -a -q)
@@ -82,9 +73,12 @@ jobs:
 
   run_docker:
     runs-on: ubuntu-latest
+
     needs: init
+
     steps:
       - uses: actions/checkout@v3
+
       - name: 'Create env file'
         run: |
           touch .env
@@ -101,6 +95,7 @@ jobs:
           echo MAIL_TOKEN=${{ secrets.MAIL_TOKEN }} >> .env
           echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
           cat .env
+
       - name: Run docker compose
         run: docker compose up
         env:
