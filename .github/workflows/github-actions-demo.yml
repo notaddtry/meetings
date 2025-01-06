@@ -73,7 +73,6 @@ jobs:
           echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
           echo MAIL_TOKEN=${{ secrets.MAIL_TOKEN }} >> .env
           echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
-          echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
           cat .env
 
       - name: Build the stack
