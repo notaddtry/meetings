@@ -41,22 +41,16 @@ jobs:
       #   image: redis:latest
       #   ports:
       #     - 6379/tcp
-      # - name: Staring Node.js ${{ matrix.node-version }}
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-      # - name: install modules
-      #   run: npm install
-      # - name: install po
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install --yes --no-install-recommends postgresql-client
-      - name: build db
-        run: ls
-      - name: build db
-        run: ps -ef | grep postgres
-      - name: build db
-        run: sudo find /tmp/ -name .s.PGSQL.5432
+      - name: Staring Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install modules
+        run: npm install
+        # - name: install po
+        #   run: |
+        #     sudo apt-get update
+        #     sudo apt-get install --yes --no-install-recommends postgresql-client
         env:
           POSTGRES_USER: ${{ vars.POSTGRES_USER }}
           DEV_HOST: localhost
