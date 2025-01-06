@@ -6,12 +6,12 @@ on:
     branches: [main]
 env:
   PORT: ${{ vars.PORT }}
-  DB_USER: ${{ vars.DB_USER }}
+  POSTGRES_USER: ${{ vars.POSTGRES_USER }}
   DEV_HOST: ${{ vars.DEV_HOST }}
   PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-  DB_NAME: ${{ vars.DB_NAME }}
-  DB_PASSWORD: ${{ vars.DB_PASSWORD }}
-  DB_PORT: ${{ vars.DB_PORT }}
+  POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+  POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+  POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
   PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
   REDIS_PORT: ${{ vars.REDIS_PORT }}
   MAIL_USER: ${{ secrets.MAIL_USER }}
@@ -39,18 +39,18 @@ jobs:
         run: |
           touch .env
           echo PORT=${{ vars.PORT }} >> .env
-          echo DB_USER=${{ vars.DB_USER }} >> .env
+          echo POSTGRES_USER=${{ vars.POSTGRES_USER }} >> .env
           echo DEV_HOST=${{ vars.DEV_HOST }} >> .env
           echo PROD_HOST_DB=${{ vars.PROD_HOST_DB }} >> .env
-          echo DB_NAME=${{ vars.DB_NAME }} >> .env
-          echo DB_PASSWORD=${{ vars.DB_PASSWORD }} >> .env
-          echo DB_PORT=${{ vars.DB_PORT }} >> .env
+          echo POSTGRES_DB=${{ vars.POSTGRES_DB }} >> .env
+          echo POSTGRES_PASSWORD=${{ vars.POSTGRES_PASSWORD }} >> .env
+          echo POSTGRES_PORT=${{ vars.POSTGRES_PORT }} >> .env
           echo PROD_HOST_REDIS=${{ vars.PROD_HOST_REDIS }} >> .env
           echo REDIS_PORT=${{ vars.REDIS_PORT }} >> .env
           echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
           echo MAIL_TOKEN=${{ secrets.MAIL_TOKEN }} >> .env
           echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+          echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
           cat .env
 
       - name: Build the stack
@@ -84,9 +84,9 @@ jobs:
 
         env:
           NODE_ENV: prod
-          DB_USER: ${{ vars.DB_USER }}
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
           DEV_HOST: ${{ vars.DEV_HOST }}
           PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-          DB_NAME: ${{ vars.DB_NAME }}
-          DB_PASSWORD: ${{ vars.DB_PASSWORD }}
-          DB_PORT: ${{ vars.DB_PORT }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
