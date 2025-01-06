@@ -80,7 +80,13 @@ jobs:
           POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
           POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
       - name: stop postgres service
-        run: docker stop $$(docker ps -a -q)
+        run: |
+          ids=$(docker ps -a -q)
+          for id in $ids
+          do
+          echo "$id"
+          docker stop $id && docker rm $id
+          done
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
