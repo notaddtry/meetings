@@ -58,8 +58,8 @@ jobs:
           POSTGRES_DB: ${{ vars.POSTGRES_DB }}
           POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
           POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
-      - name: start project
-        run: npm run start
+      # - name: start project
+      #   run: npm run start
       - name: unit test
         run: npm run test:unit
         env:
