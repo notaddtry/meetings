@@ -32,6 +32,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: install modules
         run: npm install
+      - name: build db
+        run: npm run db:build
       - name: start project
         run: npm run start
       - name: unit test
@@ -43,7 +45,6 @@ jobs:
       - name: e2e test
         run: npm run test:integration
         env:
-          NODE_ENV: prod
           POSTGRES_USER: ${{ vars.POSTGRES_USER }}
           DEV_HOST: ${{ vars.DEV_HOST }}
           PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
