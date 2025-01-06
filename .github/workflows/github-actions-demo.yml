@@ -90,8 +90,54 @@ jobs:
 
   run_docker:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
     needs: init
     steps:
+      - uses: actions/checkout@v3
+      - name: Staring Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install modules
+        run: npm install
+        env:
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          DEV_HOST: localhost
+          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
+      # - name: start project
+      #   run: npm run start
+      - name: Connect to PostgreSQL
+        # Runs a script that creates a PostgreSQL table, populates
+        # the table with data, and then retrieves the data.
+        run: node ./db/build.js
+      - name: unit test
+        run: npm run test:unit
+        env:
+          PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+          REDIS_PORT: ${{ vars.REDIS_PORT }}
+          DEV_HOST: ${{ vars.DEV_HOST }}
+      - name: e2e test
+        run: npm run test:integration
+        env:
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          DEV_HOST: ${{ vars.DEV_HOST }}
+          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
+      - name: stop postgres service
+        run: |
+          ids=$(docker ps -a -q)
+          for id in $ids
+          do
+          echo "$id"
+          docker stop $id && docker rm $id
+          done
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
