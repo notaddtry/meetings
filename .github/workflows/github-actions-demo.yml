@@ -52,12 +52,12 @@ jobs:
         #     sudo apt-get update
         #     sudo apt-get install --yes --no-install-recommends postgresql-client
         env:
-          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-          DEV_HOST: ${{ vars.DEV_HOST }}
-          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
-          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
+          POSTGRES_USER: $POSTGRES_USER
+          DEV_HOST: $DEV_HOST
+          PROD_HOST_DB: $PROD_HOST_DB
+          POSTGRES_DB: $POSTGRES_DB
+          POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+          POSTGRES_PORT: $POSTGRES_PORT
       # - name: start project
       #   run: npm run start
       - name: Connect to PostgreSQL
@@ -67,18 +67,18 @@ jobs:
       - name: unit test
         run: npm run test:unit
         env:
-          PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
-          REDIS_PORT: ${{ vars.REDIS_PORT }}
-          DEV_HOST: ${{ vars.DEV_HOST }}
+          PROD_HOST_REDIS: $PROD_HOST_REDIS
+          REDIS_PORT: $REDIS_PORT
+          DEV_HOST: $DEV_HOST
       - name: e2e test
         run: npm run test:integration
         env:
-          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-          DEV_HOST: ${{ vars.DEV_HOST }}
-          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
-          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
+          POSTGRES_USER: $POSTGRES_USER
+          DEV_HOST: $DEV_HOST
+          PROD_HOST_DB: $PROD_HOST_DB
+          POSTGRES_DB: $POSTGRES_DB
+          POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+          POSTGRES_PORT: $POSTGRES_PORT
       - name: stop postgres service
         run: |
           ids=$(docker ps -a -q)
