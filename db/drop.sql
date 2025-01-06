@@ -1,0 +1,1 @@
+DROP DATABASE meetings WITH (FORCE);

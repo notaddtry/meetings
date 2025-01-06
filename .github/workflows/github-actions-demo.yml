@@ -26,16 +26,16 @@ jobs:
         node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
-      - name: Staring Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: install modules
-        run: npm install
-      - name: install po
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends postgresql-client
+      # - name: Staring Node.js ${{ matrix.node-version }}
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: ${{ matrix.node-version }}
+      # - name: install modules
+      #   run: npm install
+      # - name: install po
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install --yes --no-install-recommends postgresql-client
       - name: build db
         run: ls
       - name: build db
@@ -43,7 +43,7 @@ jobs:
       - name: build db
         run: sudo find /tmp/ -name .s.PGSQL.5432
       - name: build db
-        run: npm run db:build
+        run: psql -U postgres -c \"DROP DATABASE meetings WITH (FORCE);\" -c \"CREATE DATABASE meetings;\"
         env:
           POSTGRES_USER: ${{ vars.POSTGRES_USER }}
           DEV_HOST: localhost
