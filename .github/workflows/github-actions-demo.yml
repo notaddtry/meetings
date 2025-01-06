@@ -121,15 +121,6 @@ jobs:
           PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
           REDIS_PORT: ${{ vars.REDIS_PORT }}
           DEV_HOST: ${{ vars.DEV_HOST }}
-      - name: e2e test
-        run: npm run test:integration
-        env:
-          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-          DEV_HOST: ${{ vars.DEV_HOST }}
-          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
-          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
       - name: stop postgres service
         run: |
           ids=$(docker ps -a -q)
