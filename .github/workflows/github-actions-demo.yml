@@ -39,6 +39,8 @@ jobs:
       - name: build db
         run: ls
       - name: build db
+        run: ps -ef | grep postgres
+      - name: build db
         run: npm run db:build
         env:
           POSTGRES_USER: ${{ vars.POSTGRES_USER }}
