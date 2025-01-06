@@ -32,11 +32,6 @@ jobs:
       postgres:
         image: postgres:10.10
 
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: meetings
-
         ports:
           - 5432:5432
 
@@ -45,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Staring Node.js ${{ matrix.node-version }}
+      - name: staring Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
@@ -53,7 +48,7 @@ jobs:
       - name: install modules
         run: npm install
 
-      - name: Connect to PostgreSQL
+      - name: fulfill db
         run: node ./db/build.js
 
       - name: unit test
@@ -79,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: 'Create env file'
+      - name: create env
         run: |
           touch .env
           echo PORT=${{ vars.PORT }} >> .env
@@ -96,12 +91,5 @@ jobs:
           echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
           cat .env
 
-      - name: Run docker compose
+      - name: run docker compose
         run: docker compose up
-        env:
-          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-          DEV_HOST: ${{ vars.DEV_HOST }}
-          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
-          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
-          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
