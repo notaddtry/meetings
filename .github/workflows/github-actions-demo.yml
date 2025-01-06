@@ -1,4 +1,4 @@
-name: cicd meetings
+name: cicd with actions
 on:
   push:
     branches: [main]
@@ -29,10 +29,21 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: install modules
         run: npm install
+        env:
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          DEV_HOST: ${{ vars.DEV_HOST }}
+          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
       - name: Connect to PostgreSQL
         run: node ./db/build.js
       - name: unit test
         run: npm run test:unit
+        env:
+          PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+          REDIS_PORT: ${{ vars.REDIS_PORT }}
+          DEV_HOST: ${{ vars.DEV_HOST }}
       - name: e2e test
         run: npm run test:integration
         env:
