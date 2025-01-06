@@ -1,0 +1,100 @@
+name: cicd with actions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PORT: ${{ vars.PORT }}
+  POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+  DEV_HOST: ${{ vars.DEV_HOST }}
+  PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+  POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+  POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+  POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
+  PROD_HOST_REDIS: ${{ vars.PROD_HOST_REDIS }}
+  REDIS_PORT: ${{ vars.REDIS_PORT }}
+  MAIL_USER: ${{ secrets.MAIL_USER }}
+  MAIL_TOKEN: ${{ secrets.MAIL_TOKEN }}
+  TG_TOKEN: ${{ secrets.TG_TOKEN }}
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    services:
+      postgres:
+        image: postgres:10.10
+
+        env:
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+
+        ports:
+          - 5432:5432
+
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: staring Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: install modules
+        run: npm install
+
+      - name: fulfill db
+        run: node ./db/build.js
+
+      - name: unit test
+        run: npm run test:unit
+
+      - name: e2e test
+        run: npm run test:integration
+
+      - name: stop postgres service
+        run: |
+          ids=$(docker ps -a -q)
+          for id in $ids
+          do
+          echo "$id"
+          docker stop $id && docker rm $id
+          done
+
+  run_docker:
+    runs-on: ubuntu-latest
+
+    needs: init
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: create env
+        run: |
+          touch .env
+          echo PORT=${{ vars.PORT }} >> .env
+          echo POSTGRES_USER=${{ vars.POSTGRES_USER }} >> .env
+          echo DEV_HOST=${{ vars.DEV_HOST }} >> .env
+          echo PROD_HOST_DB=${{ vars.PROD_HOST_DB }} >> .env
+          echo POSTGRES_DB=${{ vars.POSTGRES_DB }} >> .env
+          echo POSTGRES_PASSWORD=${{ vars.POSTGRES_PASSWORD }} >> .env
+          echo POSTGRES_PORT=${{ vars.POSTGRES_PORT }} >> .env
+          echo PROD_HOST_REDIS=${{ vars.PROD_HOST_REDIS }} >> .env
+          echo REDIS_PORT=${{ vars.REDIS_PORT }} >> .env
+          echo MAIL_USER=${{ secrets.MAIL_USER }} >> .env
+          echo MAIL_TOKEN=${{ secrets.MAIL_TOKEN }} >> .env
+          echo TG_TOKEN=${{ secrets.TG_TOKEN }} >> .env
+          cat .env
+
+      - name: run docker compose
+        run: docker compose up

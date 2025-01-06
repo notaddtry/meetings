@@ -1,0 +1,58 @@
+services:
+  server:
+    image: server
+    container_name: server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/server
+      - server-v:/server/node_modules
+    links:
+      - db
+      - redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: database
+    container_name: ${PROD_HOST_DB}
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - database-v:/var/lib/postgresql/data
+    command: '-p ${POSTGRES_PORT}'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      start_period: 0s
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis
+    container_name: meetings-redis
+    environment:
+      REDIS_HOST: redis://redis
+      REDIS_PORT: 6379
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      retries: 5
+    expose:
+      - 6379
+
+volumes:
+  server-v:
+    name: 'server-v'
+  database-v:
+    name: 'database-v'

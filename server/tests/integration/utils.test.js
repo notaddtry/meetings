@@ -1,6 +1,6 @@
 const pool = require('../../../db/pool.js')
 const assert = require('assert')
-const { isWorkerRegistered } = require('../../commands/utils.js')
+const { isWorkerRegistered } = require('../../bot/commands/utils.js')
 
 describe('Тестирование регистрации пользователя', () => {
   it('Должен вернуть true, если пользователь зарегистрирован', async function () {

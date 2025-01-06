@@ -1,4 +1,7 @@
-const { validateEmail, generateDocument } = require('../../commands/utils.js')
+const {
+  validateEmail,
+  generateDocument,
+} = require('../../bot/commands/utils.js')
 const fs = require('fs')
 const path = require('path')
 const assert = require('assert')
