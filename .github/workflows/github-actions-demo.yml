@@ -38,6 +38,13 @@ jobs:
           sudo apt-get install --yes --no-install-recommends postgresql-client
       - name: build db
         run: npm run db:build
+        env:
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          DEV_HOST: ${{ vars.DEV_HOST }}
+          PROD_HOST_DB: ${{ vars.PROD_HOST_DB }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
       - name: start project
         run: npm run start
       - name: unit test
