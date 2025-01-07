@@ -97,4 +97,4 @@ jobs:
           cat .env
 
       - name: run docker compose
-        run: COMPOSE_HTTP_TIMEOUT=300 docker-compose up -d
+        run: COMPOSE_HTTP_TIMEOUT=3000 docker-compose up -d
