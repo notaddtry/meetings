@@ -1,8 +1,7 @@
-const { bot } = require('./../bot.js')
 const { setUserState } = require('../../../redis/utils.js')
 const { isWorkerRegistered } = require('./utils.js')
 
-const createTeam = () => {
+const createTeam = (bot) => {
   bot.onText('/create_team', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username

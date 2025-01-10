@@ -1,10 +1,9 @@
-const { bot } = require('./../bot.js')
 const { setUserState } = require('../../../redis/utils.js')
 const pool = require('../../../db/pool.js')
 const { isWorkerRegistered } = require('./utils.js')
 const { selectWorkerByUsername } = require('../../../db/seletors.js')
 
-const setMark = () => {
+const setMark = (bot) => {
   bot.onText('/set_mark', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username

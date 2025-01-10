@@ -1,10 +1,9 @@
-const { bot } = require('./../bot.js')
 const pool = require('../../../db/pool.js')
 const { setUserState } = require('../../../redis/utils.js')
 const { isWorkerRegistered } = require('./utils.js')
 const { selectWorkerByUsername } = require('../../../db/seletors.js')
 
-const getInfoMeeting = () => {
+const getInfoMeeting = (bot) => {
   bot.onText('/get_info_meeting', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username
@@ -27,6 +26,17 @@ const getInfoMeeting = () => {
     }
 
     const worker = await selectWorkerByUsername(username)
+
+    const isWorkerLeader = await pool.query(`
+      SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
+      `)
+
+    if (!isWorkerLeader.rows.length) {
+      return await bot.sendMessage(
+        chatId,
+        'Вы не являетесь руководителем команды. Создайте команду,чтобы добавлять в нее участников.'
+      )
+    }
 
     const teamsUnderCurrentLeader = await pool.query(`
       SELECT * FROM team WHERE leader_id = ${worker.rows[0].id};

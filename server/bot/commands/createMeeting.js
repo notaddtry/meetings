@@ -1,10 +1,9 @@
-const { bot } = require('./../bot.js')
 const { setUserState } = require('../../../redis/utils.js')
 const pool = require('../../../db/pool.js')
 const { isWorkerRegistered } = require('./utils.js')
 const { selectWorkerByUsername } = require('../../../db/seletors.js')
 
-const createMeeting = () => {
+const createMeeting = (bot) => {
   bot.onText('/create_meeting', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username
@@ -22,10 +21,14 @@ const createMeeting = () => {
       SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
       `)
 
-    if (!isWorkerLeader.rows.length) {
+    const isWorkerResponsible = await pool.query(`
+      SELECT * FROM worker_team_role WHERE worker_id = ${worker.rows[0].id} AND role_id = (SELECT id FROM role WHERE title = 'Responsible');
+      `)
+
+    if (!isWorkerLeader.rows.length && !isWorkerResponsible.rows.length) {
       return await bot.sendMessage(
         chatId,
-        'Вы не являетесь руководителем команды. Создайте команду,чтобы создать собрание в ней.'
+        'Вы не являетесь руководителем команды или ответственным  лицом. Создайте команду,чтобы создать собрание в ней.'
       )
     }
 
