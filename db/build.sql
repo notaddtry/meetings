@@ -82,6 +82,7 @@ CREATE TYPE Status_Notification AS ENUM ('Readed', 'Not Readed');
 CREATE TABLE notification (
     id SERIAL PRIMARY KEY,
     meeting_id INT REFERENCES meeting(id) ON DELETE CASCADE,
+    worker_id INT REFERENCES worker(id) ON DELETE CASCADE,
     status Status_Notification
 );
 
@@ -181,12 +182,12 @@ $$ LANGUAGE plpgsql;
 
 INSERT INTO worker(username, email, chat_id)
 VALUES
-('notaddtry', 'comatose.7777@mail.ru', 229820673),
 ('meeting_test_1', 'comatose9999@proton.me', 7632038593);
+('meeting_test_2', 'comatose6666@proton.me', 7636404014);
  
 INSERT INTO leader(worker_id)
 VALUES
-((SELECT id FROM worker WHERE username = 'notaddtry'));
+((SELECT id FROM worker WHERE username = 'meeting_test_1'));
 
 INSERT INTO role(title)
 VALUES
@@ -212,9 +213,9 @@ VALUES
 ((SELECT id FROM role WHERE title = 'Responsible'), (SELECT id FROM access_rights WHERE title = 'See meetings')),
 ((SELECT id FROM role WHERE title = 'Worker'), (SELECT id FROM access_rights WHERE title = 'See meetings'));
 
-SELECT create_team_function('Development Team', (SELECT id FROM leader WHERE worker_id = (SELECT id FROM worker WHERE username = 'notaddtry'))) AS team_id;
+SELECT create_team_function('Development Team', (SELECT id FROM leader WHERE worker_id = (SELECT id FROM worker WHERE username = 'meeting_test_1'))) AS team_id;
 
-SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'meeting_test_1'), (SELECT id FROM role WHERE title = 'Worker'));
+SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'meeting_test_2'), (SELECT id FROM role WHERE title = 'Worker'));
 
 SELECT create_meeting_function('2023-09-20 14:00:00', 'Online', (SELECT id FROM team WHERE title = 'Development Team')) AS meeting_id;
 SELECT create_meeting_function('2025-09-20 14:00:00', 'Offline', (SELECT id FROM team WHERE title = 'Development Team')) AS meeting_id;

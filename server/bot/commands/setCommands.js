@@ -2,19 +2,20 @@ const getInfoMeeting = require('./getInfoMeeting.js')
 const start = require('./start.js')
 const getMeetings = require('./getMeetings.js')
 const createTeam = require('./createTeam.js')
-const messageHandler = require('./messageHandler.js')
 const createMeeting = require('./createMeeting.js')
 const setMark = require('./setMark.js')
+const addMemberToTeam = require('./addMemberToTeam.js')
+const getCommands = require('./getCommands.js')
 
-const setCommands = () => {
-  start()
-  getInfoMeeting()
-  getMeetings()
-  createTeam()
-  createMeeting()
-  setMark()
-
-  messageHandler()
+const setCommands = (bot) => {
+  start(bot)
+  getCommands(bot)
+  getInfoMeeting(bot)
+  getMeetings(bot)
+  createTeam(bot)
+  createMeeting(bot)
+  setMark(bot)
+  addMemberToTeam(bot)
 }
 
 module.exports = setCommands

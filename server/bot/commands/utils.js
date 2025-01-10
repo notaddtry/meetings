@@ -2,7 +2,6 @@ const fs = require('fs')
 const officegen = require('officegen')
 const path = require('path')
 const { selectWorkerByUsername } = require('../../../db/seletors.js')
-const { bot } = require('./../bot.js')
 
 const validateEmail = (email) => {
   return String(email)
@@ -30,6 +29,8 @@ async function generateDocument(workerMarkMap, workers) {
   Object.keys(workerMarkMap).map((id) => {
     const worker = workers.rows.find((worker) => worker.id === +id)
 
+    console.log(workerMarkMap, workers.rows, id)
+
     pObj = docx.createP()
 
     pObj.addText(
@@ -52,14 +53,8 @@ async function generateDocument(workerMarkMap, workers) {
   docx.generate(out)
 }
 
-const handleError = (error, chatId, text) => {
-  console.error(error)
-  bot.sendMessage(chatId, text || 'Произошла ошибка. Попробуйте позже.')
-}
-
 module.exports = {
   validateEmail,
   isWorkerRegistered,
   generateDocument,
-  handleError,
 }

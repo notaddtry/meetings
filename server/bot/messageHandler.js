@@ -1,29 +1,27 @@
-const pool = require('../../../db/pool.js')
+const pool = require('../../db/pool.js')
 const {
   clearUserState,
   getUserState,
   setUserState,
-} = require('../../../redis/utils.js')
-const { bot } = require('./../bot.js')
+} = require('../../redis/utils.js')
 const fs = require('fs')
 const path = require('path')
 const {
   validateEmail,
   isWorkerRegistered,
   generateDocument,
-  handleError,
-} = require('./utils.js')
+} = require('./commands/utils.js')
 const {
   selectWorkerByUsername,
   selectWorkerTeamRoleByTeamIdOrWorkerId,
-} = require('../../../db/seletors.js')
-const { sendMail } = require('../../mail/utils.js')
+} = require('../../db/seletors.js')
+const { sendMail } = require('../mail/utils.js')
 
 function isDateValid(dateStr) {
   return !isNaN(new Date(dateStr))
 }
 
-const messageHandler = () => {
+const messageHandler = (bot) => {
   bot.on('message', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username
@@ -80,15 +78,32 @@ const messageHandler = () => {
                 'Укажите правильный формат (онлайн / офлайн)'
               )
             }
+            const teamsFromLeadership = await pool.query(`
+                SELECT * FROM team WHERE leader_id = '${worker.rows[0].id}';
+                `)
 
-            const teams = await pool.query(`
-            SELECT * FROM team WHERE leader_id = '${worker.rows[0].id}';
-            `)
+            let teams = [...teamsFromLeadership.rows]
+
+            const workerTeamRoleFromResponsible = await pool.query(`
+              SELECT * FROM worker_team_role WHERE worker_id = '${worker.rows[0].id}' AND role_id = (SELECT id FROM role WHERE title = 'Responsible')
+              `)
+
+            const workerTeamRoleMapId = workerTeamRoleFromResponsible.rows.map(
+              (workerTeamRole) => workerTeamRole.team_id
+            )
+
+            if (workerTeamRoleMapId.length) {
+              const teamsFromResponsible = await pool.query(`
+                SELECT * FROM team WHERE id = ANY(ARRAY[${workerTeamRoleMapId}]);
+                `)
+
+              teams = [...teams, ...teamsFromResponsible.rows]
+            }
 
             await bot.sendMessage(
               chatId,
               `Укажите идентификатор команду,в которой хотите сделать собрание:
-              ${teams.rows
+              ${teams
                 .map(
                   (team) => `
     Идентификатор команды: ${team.id}
@@ -124,11 +139,6 @@ const messageHandler = () => {
               )
             }
 
-            // TODO DEBBUGGING
-            if (!state.date) {
-              return
-            }
-
             const meetingId = await pool.query(`
               SELECT create_meeting_function('${new Date(
                 state.date
@@ -149,46 +159,79 @@ const messageHandler = () => {
               `
             )
 
-            const leaderOfATeam = await pool.query(`
-              SELECT * FROM leader WHERE id = ${team.rows[0].leader_id};
-              `)
+            console.log(1)
 
             const workerTeamRoleInCurrentTeam =
               await selectWorkerTeamRoleByTeamIdOrWorkerId(messageText, 'team')
 
+            console.log(2)
             const workerInCurrentTeamIds = workerTeamRoleInCurrentTeam.rows.map(
               (workerTeamRole) => workerTeamRole.worker_id
             )
-
+            console.log(3)
             const workers = await pool.query(`
-              SELECT * FROM worker WHERE id = ANY(ARRAY[${workerInCurrentTeamIds}]) AND NOT id = ${leaderOfATeam.rows[0].worker_id};
+              SELECT * FROM worker WHERE id = ANY(ARRAY[${workerInCurrentTeamIds}]);
               `)
+            console.log(4)
 
+            const leaderWorker = await pool.query(`
+                SELECT * FROM worker WHERE id = ${team.rows[0].leader_id}
+              `)
+            console.log(6)
             const workersMail = workers.rows.map((worker) => worker.email)
-            const workersChatId = workers.rows.map((worker) => worker.chat_id)
+            const workersChatId = workers.rows
+              .filter((worker) => worker.id !== leaderWorker.rows[0].id)
+              .map((worker) => worker.chat_id)
 
             sendMail(workersMail, state, team)
 
+            try {
+              await bot.sendMessage(
+                leaderWorker.rows[0].chat_id,
+                `У вас новое собрание.
+                  Идентификатор собрание: ${meetingId.rows[0].meeting_id}
+                  Дата собрания: ${new Date(state.date).toLocaleString()},
+                  Тип собрания: ${
+                    state.type === 'Offline' ? 'Офлайн' : 'Онлайн'
+                  }
+                  Команда: ${team.rows[0].title}
+                  `
+              )
+            } catch (error) {
+              console.error(error)
+            }
+
             for (const workerChatId of workersChatId) {
               try {
-                await bot.sendMessage(workerChatId, 'У вас новое собрание.', {
-                  reply_markup: JSON.stringify({
-                    inline_keyboard: [
-                      [
-                        {
-                          text: 'Принять',
-                          callback_data: `markYes/${meetingId.rows[0].meeting_id}`,
-                        },
+                await bot.sendMessage(
+                  workerChatId,
+                  `У вас новое собрание.
+                  Идентификатор собрание: ${meetingId.rows[0].meeting_id}
+                  Дата собрания: ${new Date(state.date).toLocaleString()},
+                  Тип собрания: ${
+                    state.type === 'Offline' ? 'Офлайн' : 'Онлайн'
+                  }
+                  Команда: ${team.rows[0].title}
+                  `,
+                  {
+                    reply_markup: JSON.stringify({
+                      inline_keyboard: [
+                        [
+                          {
+                            text: 'Принять',
+                            callback_data: `markYes/${meetingId.rows[0].meeting_id}`,
+                          },
+                        ],
+                        [
+                          {
+                            text: 'Отклонить',
+                            callback_data: `markNo/${meetingId.rows[0].meeting_id}`,
+                          },
+                        ],
                       ],
-                      [
-                        {
-                          text: 'Отклонить',
-                          callback_data: `markNo/${meetingId.rows[0].meeting_id}`,
-                        },
-                      ],
-                    ],
-                  }),
-                })
+                    }),
+                  }
+                )
               } catch (error) {
                 console.error(error)
               }
@@ -216,18 +259,20 @@ const messageHandler = () => {
               `)
 
             const workerMarkMap = workersInTeam.rows.reduce((acc, val) => {
-              if (val.id === worker.rows[0].id) {
+              console.log(val)
+
+              if (val.worker_id === worker.rows[0].id) {
                 return acc
               }
 
               const markFromWorker = marksFromWorkers.rows.find(
-                (mark) => mark.worker_id === val.id
+                (mark) => mark.worker_id === val.worker_id
               )
 
               if (markFromWorker) {
-                acc[val.id] = markFromWorker.can_be_in_meeting
+                acc[val.worker_id] = markFromWorker.can_be_in_meeting
               } else {
-                acc[val.id] = null
+                acc[val.worker_id] = null
               }
 
               return acc
@@ -256,14 +301,19 @@ const messageHandler = () => {
                           path.join(__dirname, '../../example.docx')
                         )
                       })
-                      .catch((error) =>
-                        handleError(error, chatId, ERROR_MESSAGE)
-                      )
+                      .catch((error) => {
+                        console.error(error)
+                        bot.sendMessage(chatId, ERROR_MESSAGE)
+                      })
                   }, 1000)
                 })
-                .catch((error) => handleError(error, chatId, ERROR_MESSAGE))
+                .catch((error) => {
+                  console.error(error)
+                  bot.sendMessage(chatId, ERROR_MESSAGE)
+                })
             } catch (error) {
-              handleError(error, chatId, ERROR_MESSAGE)
+              console.error(error)
+              bot.sendMessage(chatId, ERROR_MESSAGE)
             }
           }
         } else if (state.action === 'setMark') {
@@ -297,29 +347,14 @@ const messageHandler = () => {
             }
           }
         } else if (state.action === 'start') {
-          if (state.status === 'waitingForUsername') {
-            const adaptedMessageText = messageText.replaceAll('@', '')
-
-            try {
-              await setUserState(chatId, {
-                action: 'meeting',
-                status: 'waitingForUserEmail',
-                username: adaptedMessageText,
-              })
-
-              await bot.sendMessage(chatId, `Укажите Вашу почту.`)
-            } catch (err) {
-              console.error('Ошибка при вызове setUserState:', err)
-              return
-            }
-          } else if (state.status === 'waitingForUserEmail') {
+          if (state.status === 'waitingForUserEmail') {
             if (!validateEmail(messageText)) {
               return await bot.sendMessage(chatId, 'Введите корректный email.')
             }
 
             try {
               await pool.query(`
-              INSERT INTO worker (username, email, chat_id) VALUES ('${state.username}', '${state.email}', ${chatId});
+              INSERT INTO worker (username, email, chat_id) VALUES ('${username}', '${messageText}', ${chatId});
               `)
 
               await bot.sendMessage(chatId, `Вы успешно зарегистрированы!`)
@@ -350,6 +385,107 @@ const messageHandler = () => {
                 'Произошла ошибка при создании команды.'
               )
             }
+          }
+        } else if (state.action === 'addMember') {
+          if (state.status === 'waitingForSelectTeam') {
+            const teamId = +messageText
+
+            try {
+              await setUserState(chatId, {
+                ...state,
+                status: 'waitingForUsername',
+                teamId,
+              })
+            } catch (err) {
+              console.error('Ошибка при вызове setUserState:', err)
+              return
+            }
+
+            await bot.sendMessage(
+              chatId,
+              'Введите логин сотрудника,которого Вы хотите добавить.'
+            )
+          } else if (state.status === 'waitingForUsername') {
+            const adaptedMessageText = messageText.replaceAll('@', '')
+
+            const workerToAdd = await pool.query(`
+              SELECT * FROM worker WHERE username = '${adaptedMessageText}';
+              `)
+
+            if (!workerToAdd.rows.length) {
+              await bot.sendMessage(
+                chatId,
+                'Сотрудник с таким логином не зарегистрирован в боте.'
+              )
+              return
+            }
+
+            const workerTeamRoleExists = await pool.query(`
+              SELECT * FROM worker_team_role WHERE worker_id = ${workerToAdd.rows[0].id} AND team_id = ${state.teamId}
+              `)
+
+            if (workerTeamRoleExists.rows.length) {
+              await bot.sendMessage(chatId, 'Сотруднику уже назначена роль.')
+              return
+            }
+
+            const roles = await pool.query(`
+              SELECT * FROM role
+              `)
+
+            const inlineKeyboard = roles.rows
+              .map((role) => {
+                if (role.title === 'Leader') {
+                  return
+                }
+
+                return [
+                  {
+                    text:
+                      role.title === 'Responsible'
+                        ? 'Ответственное лицо(может создавать собрания)'
+                        : 'Сотрудник',
+                    callback_data: `addMemberChooseRole/${role.title}`,
+                  },
+                ]
+              })
+              .filter((r) => r)
+
+            try {
+              await setUserState(chatId, {
+                ...state,
+                status: 'waitingForChooseRole',
+                username: adaptedMessageText,
+              })
+
+              await bot.sendMessage(chatId, 'Выберите роль.', {
+                reply_markup: JSON.stringify({
+                  inline_keyboard: inlineKeyboard,
+                }),
+              })
+            } catch (error) {
+              console.error(error)
+              await bot.sendMessage(
+                chatId,
+                'Произошла ошибка при добавлении сотрудника.'
+              )
+            }
+
+            // try {
+            //   await pool.query(`
+            //   SELECT add_worker_to_team(${state.teamId}, ${workerToAdd.rows[0].id}, (SELECT id FROM role WHERE title = 'Worker'));
+            //   `)
+
+            //   await bot.sendMessage(chatId, 'Сотрудник успешно добавлен!')
+
+            //   await clearUserState(chatId)
+            // } catch (error) {
+            //   console.error(error)
+            //   await bot.sendMessage(
+            //     chatId,
+            //     'Произошла ошибка при добавлении сотрудника.'
+            //   )
+            // }
           }
         }
       }

@@ -1,4 +1,3 @@
-const { bot } = require('./../bot.js')
 const pool = require('../../../db/pool.js')
 const { isWorkerRegistered } = require('./utils.js')
 const {
@@ -6,7 +5,7 @@ const {
   selectWorkerTeamRoleByTeamIdOrWorkerId,
 } = require('../../../db/seletors.js')
 
-const getMeetings = () => {
+const getMeetings = (bot) => {
   bot.onText('/get_meetings', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username
