@@ -318,33 +318,28 @@ const messageHandler = (bot) => {
           }
         } else if (state.action === 'setMark') {
           if (state.status === 'waitingForMeetingForMark') {
-            try {
-              await bot.sendMessage(
-                chatId,
-                `Укажите, сможете ли Вы быть на собрании.`,
-                {
-                  reply_markup: JSON.stringify({
-                    inline_keyboard: [
-                      [
-                        {
-                          text: 'Принять',
-                          callback_data: `markYes/${messageText}`,
-                        },
-                      ],
-                      [
-                        {
-                          text: 'Отклонить',
-                          callback_data: `markNo/${messageText}`,
-                        },
-                      ],
+            await bot.sendMessage(
+              chatId,
+              `Укажите, сможете ли Вы быть на собрании.`,
+              {
+                reply_markup: JSON.stringify({
+                  inline_keyboard: [
+                    [
+                      {
+                        text: 'Принять',
+                        callback_data: `markYes/${messageText}`,
+                      },
                     ],
-                  }),
-                }
-              )
-            } catch (err) {
-              console.error('Ошибка при вызове setUserState:', err)
-              return
-            }
+                    [
+                      {
+                        text: 'Отклонить',
+                        callback_data: `markNo/${messageText}`,
+                      },
+                    ],
+                  ],
+                }),
+              }
+            )
           }
         } else if (state.action === 'start') {
           if (state.status === 'waitingForUserEmail') {
@@ -470,22 +465,6 @@ const messageHandler = (bot) => {
                 'Произошла ошибка при добавлении сотрудника.'
               )
             }
-
-            // try {
-            //   await pool.query(`
-            //   SELECT add_worker_to_team(${state.teamId}, ${workerToAdd.rows[0].id}, (SELECT id FROM role WHERE title = 'Worker'));
-            //   `)
-
-            //   await bot.sendMessage(chatId, 'Сотрудник успешно добавлен!')
-
-            //   await clearUserState(chatId)
-            // } catch (error) {
-            //   console.error(error)
-            //   await bot.sendMessage(
-            //     chatId,
-            //     'Произошла ошибка при добавлении сотрудника.'
-            //   )
-            // }
           }
         }
       }
