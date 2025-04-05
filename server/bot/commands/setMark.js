@@ -47,7 +47,7 @@ const setMark = (bot) => {
       .map((meeting) => {
         return `    Идентификатор встречи: ${meeting.id}
     Команда: ${meetingInTeam.title}
-    Дата встречи: ${new Date(meeting.date).toLocaleString()}
+    Дата встречи: ${new Date(meeting.date).toLocaleDateString()}
     Тип встречи: ${
       meeting.type === 'Online' ? 'Онлайн-формат' : 'Оффлайн-формат'
     }`

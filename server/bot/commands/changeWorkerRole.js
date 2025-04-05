@@ -1,10 +1,11 @@
-const { selectWorkerByUsername } = require('../../../db/seletors.js')
-const { isWorkerRegistered } = require('./utils.js')
-const pool = require('../../../db/pool.js')
+// change_worker_role
 const { setUserState } = require('../../../redis/utils.js')
+const pool = require('../../../db/pool.js')
+const { isWorkerRegistered } = require('./utils.js')
+const { selectWorkerByUsername } = require('../../../db/seletors.js')
 
-const addMemberToTeam = (bot) => {
-  bot.onText('/add_member_to_team', async (msg) => {
+const changeWorkerRole = (bot) => {
+  bot.onText('/change_worker_role', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username
 
@@ -24,7 +25,7 @@ const addMemberToTeam = (bot) => {
     if (!isWorkerLeader.rows.length) {
       return await bot.sendMessage(
         chatId,
-        'Вы не являетесь руководителем команды. Создайте команду,чтобы добавлять в нее участников.'
+        'Вы не можете менять роли участников,так как вы не являетесь руководителем ни одной команды.'
       )
     }
 
@@ -32,29 +33,31 @@ const addMemberToTeam = (bot) => {
       SELECT * FROM team WHERE leader_id = '${worker.rows[0].id}';
       `)
 
-    await bot.sendMessage(
-      chatId,
-      `Укажите идентификатор команды,в которой хотите сделать собрание:
-        ${teams.rows
-          .map(
-            (team) => `
-Идентификатор команды: ${team.id}
-Название команды: ${team.title}
-`
-          )
-          .join('\n\n')}`
-    )
+    //
 
     try {
       await setUserState(chatId, {
-        action: 'addMember',
+        action: 'changeRole',
         status: 'waitingForSelectTeam',
       })
     } catch (err) {
       console.error('Ошибка при вызове setUserState:', err)
       return
     }
+
+    return bot.sendMessage(
+      chatId,
+      `Выберите команду, в которой хотите изменить роль участника:
+      ${teams.rows
+        .map(
+          (team) => `
+Идентификатор команды: ${team.id}
+Название команды: ${team.title}
+`
+        )
+        .join('\n\n')}`
+    )
   })
 }
 
-module.exports = addMemberToTeam
+module.exports = changeWorkerRole

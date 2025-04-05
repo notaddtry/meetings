@@ -5,7 +5,7 @@ const getCommands = (bot) => {
     return bot.sendMessage(
       chatId,
       `
-      Вот список доступных комманд:
+      Вот список доступных комманд: 
       /start - Начать работу с ботом;
       /create_meeting - Создать собрание;
       /create_team - Создать команду;
@@ -13,6 +13,7 @@ const getCommands = (bot) => {
       /get_meetings - Получить список актуальных собраний;
       /set_mark - Выставить отметку о возможности прийти на собрание;
       /add_member_to_team - Добавить сотрудника в команду;
+      /change_worker_role
       `
     )
   })

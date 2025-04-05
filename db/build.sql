@@ -110,7 +110,11 @@ BEGIN
     SELECT id INTO leader_role_id
     FROM role
     WHERE title = 'Leader';
-    
+
+
+    INSERT INTO leader(worker_id)
+    VALUES
+    (in_leader_id);
     INSERT INTO team(title, leader_id)
     VALUES(in_title, in_leader_id)
     RETURNING id INTO new_team_id;
@@ -182,7 +186,7 @@ $$ LANGUAGE plpgsql;
 
 INSERT INTO worker(username, email, chat_id)
 VALUES
-('meeting_test_1', 'comatose9999@proton.me', 7632038593);
+('meeting_test_1', 'comatose9999@proton.me', 7632038593),
 ('meeting_test_2', 'comatose6666@proton.me', 7636404014);
  
 INSERT INTO leader(worker_id)

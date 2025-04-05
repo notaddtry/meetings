@@ -36,7 +36,7 @@ const messageHandler = (bot) => {
 
     if (
       !(await isWorkerRegistered(username)) &&
-      JSON.parse(state).action !== 'start'
+      JSON.parse(state)?.action !== 'start'
     ) {
       return await bot.sendMessage(
         chatId,
@@ -147,18 +147,6 @@ const messageHandler = (bot) => {
             }', ${+messageText}) AS meeting_id;
               `)
 
-            await bot.sendMessage(
-              chatId,
-              `
-              Собрание успешно создано!. 
-              
-              Идентификатор собрание: ${meetingId.rows[0].meeting_id}
-              Дата собрания: ${new Date(state.date).toLocaleString()},
-              Тип собрания: ${state.type === 'Offline' ? 'Офлайн' : 'Онлайн'}
-              Команда: ${team.rows[0].title}
-              `
-            )
-
             console.log(1)
 
             const workerTeamRoleInCurrentTeam =
@@ -188,9 +176,13 @@ const messageHandler = (bot) => {
             try {
               await bot.sendMessage(
                 leaderWorker.rows[0].chat_id,
-                `У вас новое собрание.
+                `${
+                  +leaderWorker.rows[0].chat_id === +chatId
+                    ? 'Вы создали новое собрание.'
+                    : 'Ваш сотрудник создал новое собрание'
+                } 
                   Идентификатор собрание: ${meetingId.rows[0].meeting_id}
-                  Дата собрания: ${new Date(state.date).toLocaleString()},
+                  Дата собрания: ${new Date(state.date).toLocaleDateString()},
                   Тип собрания: ${
                     state.type === 'Offline' ? 'Офлайн' : 'Онлайн'
                   }
@@ -203,11 +195,17 @@ const messageHandler = (bot) => {
 
             for (const workerChatId of workersChatId) {
               try {
+                console.log(+workerChatId, +chatId)
+
                 await bot.sendMessage(
                   workerChatId,
-                  `У вас новое собрание.
+                  `${
+                    +workerChatId === +chatId
+                      ? 'Вы создали новое собрание.'
+                      : 'У вас новое собрание.'
+                  } 
                   Идентификатор собрание: ${meetingId.rows[0].meeting_id}
-                  Дата собрания: ${new Date(state.date).toLocaleString()},
+                  Дата собрания: ${new Date(state.date).toLocaleDateString()},
                   Тип собрания: ${
                     state.type === 'Offline' ? 'Офлайн' : 'Онлайн'
                   }
@@ -438,7 +436,7 @@ const messageHandler = (bot) => {
                   {
                     text:
                       role.title === 'Responsible'
-                        ? 'Ответственное лицо(может создавать собрания)'
+                        ? 'Ответственное лицо'
                         : 'Сотрудник',
                     callback_data: `addMemberChooseRole/${role.title}`,
                   },
@@ -465,6 +463,56 @@ const messageHandler = (bot) => {
                 'Произошла ошибка при добавлении сотрудника.'
               )
             }
+          }
+        } else if (state.action === 'changeRole') {
+          if (state.status === 'waitingForSelectTeam') {
+            const teamId = +messageText
+
+            const workerTeamRoleInCurrentTeam =
+              await selectWorkerTeamRoleByTeamIdOrWorkerId(teamId, 'team')
+
+            const workerInCurrentTeamIds = workerTeamRoleInCurrentTeam.rows.map(
+              (workerTeamRole) => workerTeamRole.worker_id
+            )
+
+            const leaderWorker = await pool.query(`
+              SELECT * FROM worker WHERE id = ${teamId}
+            `)
+
+            const workers = await pool.query(`
+              SELECT * FROM worker WHERE id = ANY(ARRAY[${workerInCurrentTeamIds}]);
+              `)
+
+            try {
+              await setUserState(chatId, {
+                ...state,
+                status: 'waitingForSelectUser',
+                teamId,
+              })
+            } catch (err) {
+              console.error('Ошибка при вызове setUserState:', err)
+              return
+            }
+
+            await bot.sendMessage(
+              chatId,
+              `Выберите участника команды,которому Вы хотите сменить роль`,
+              {
+                reply_markup: JSON.stringify({
+                  inline_keyboard: workers.rows
+                    .filter((worker) => worker.id !== leaderWorker.rows[0].id)
+                    .map((worker) => {
+                      return [
+                        {
+                          text: worker.username,
+                          callback_data: `selectUser/${worker.id}`,
+                        },
+                      ]
+                    }),
+                }),
+              }
+            )
+          } else if (state.status === 'waitingForSelectUser') {
           }
         }
       }

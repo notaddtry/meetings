@@ -9,7 +9,7 @@ const sendMail = (workersMail, state, team) => {
     subject: 'Уведомление о новом собрании',
 
     html: `
-      <p>Дата собрания: ${new Date(state.date).toLocaleString()}</p>
+      <p>Дата собрания: ${new Date(state.date).toLocaleDateString()}</p>
       <p>Тип собрания: ${state.type === 'Offline' ? 'Офлайн' : 'Онлайн'}</p>
       <p>Команда: ${team.rows[0].title}</p>
   

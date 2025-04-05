@@ -6,6 +6,7 @@ const createMeeting = require('./createMeeting.js')
 const setMark = require('./setMark.js')
 const addMemberToTeam = require('./addMemberToTeam.js')
 const getCommands = require('./getCommands.js')
+const changeWorkerRole = require('./changeWorkerRole.js')
 
 const setCommands = (bot) => {
   start(bot)
@@ -16,6 +17,7 @@ const setCommands = (bot) => {
   createMeeting(bot)
   setMark(bot)
   addMemberToTeam(bot)
+  changeWorkerRole(bot)
 }
 
 module.exports = setCommands
