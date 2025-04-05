@@ -418,7 +418,10 @@ const messageHandler = (bot) => {
               `)
 
             if (workerTeamRoleExists.rows.length) {
-              await bot.sendMessage(chatId, 'Сотруднику уже назначена роль.')
+              await bot.sendMessage(
+                chatId,
+                'Участник уже находится в данной команде.'
+              )
               return
             }
 

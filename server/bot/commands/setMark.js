@@ -1,7 +1,10 @@
 const { setUserState } = require('../../../redis/utils.js')
 const pool = require('../../../db/pool.js')
 const { isWorkerRegistered } = require('./utils.js')
-const { selectWorkerByUsername } = require('../../../db/seletors.js')
+const {
+  selectWorkerByUsername,
+  selectWorkerTeamRoleByTeamIdOrWorkerId,
+} = require('../../../db/seletors.js')
 
 const setMark = (bot) => {
   bot.onText('/set_mark', async (msg) => {
@@ -35,11 +38,22 @@ const setMark = (bot) => {
       SELECT * FROM team WHERE id = ANY(ARRAY[${teamsIds}]);
       `)
 
+    const teamsWithLeaderCheck = teams.rows.filter(
+      (team) => team.leader_id !== worker.rows[0].id
+    )
+
+    if (!teamsWithLeaderCheck.length) {
+      return await bot.sendMessage(
+        chatId,
+        'Вы являетесь руководителем во все ваших командах. Вы не можете ставить отметки на собрания.'
+      )
+    }
+
     const meetings = await pool.query(`
       SELECT * FROM meeting WHERE team_id = ANY(ARRAY[${teamsIds}]) AND date > NOW();
       `)
 
-    const meetingInTeam = teams.rows.find((team) =>
+    const meetingInTeam = teamsWithLeaderCheck.find((team) =>
       meetings.rows.find((meeting) => meeting.team_id === team.id)
     )
 
