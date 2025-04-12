@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5432
 async function start() {
   try {
     app.listen(PORT, () => {
-      console.info(`hello,worlds from ${PORT},asda`)
+      console.info(`hello,world from ${PORT}`)
     })
 
     await pool.connect()

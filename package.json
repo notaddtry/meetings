@@ -6,6 +6,8 @@
     "start": "NODE_ENV=prod node ./index.js",
     "db:create": "psql -U postgres -c \"DROP DATABASE meetings WITH (FORCE);\" -c \"CREATE DATABASE meetings;",
     "db:build": "npm run db:create && node ./db/build.js",
+    "db:copy": "pg_dump -d meetings --format=c --data-only -h localhost -p 5432 -U postgres > ./db/db.sql",
+    "db:restore": "pg_restore -d meetings -h localhost -p 5432 -U postgres ./db/db.sql",
     "test:unit": "mocha **/unit/*test.js --exit",
     "test:integration": "mocha **/integration/*test.js --exit"
   },

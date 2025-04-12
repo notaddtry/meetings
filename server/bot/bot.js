@@ -25,6 +25,10 @@ const initBot = () => {
       command: '/add_member_to_team',
       description: 'Добавить сотрудника в команду',
     },
+    {
+      command: '/change_worker_role',
+      description: 'Изменить роль участника',
+    },
   ])
 
   setCommands(bot)

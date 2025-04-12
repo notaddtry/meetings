@@ -78,8 +78,13 @@ const messageHandler = (bot) => {
                 'Укажите правильный формат (онлайн / офлайн)'
               )
             }
+
+            const workerLeader = await pool.query(`
+              SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
+              `)
+
             const teamsFromLeadership = await pool.query(`
-                SELECT * FROM team WHERE leader_id = '${worker.rows[0].id}';
+                SELECT * FROM team WHERE leader_id = '${workerLeader.rows[0].id}';
                 `)
 
             let teams = [...teamsFromLeadership.rows]
@@ -147,37 +152,35 @@ const messageHandler = (bot) => {
             }', ${+messageText}) AS meeting_id;
               `)
 
-            console.log(1)
-
             const workerTeamRoleInCurrentTeam =
               await selectWorkerTeamRoleByTeamIdOrWorkerId(messageText, 'team')
 
-            console.log(2)
             const workerInCurrentTeamIds = workerTeamRoleInCurrentTeam.rows.map(
               (workerTeamRole) => workerTeamRole.worker_id
             )
-            console.log(3)
             const workers = await pool.query(`
               SELECT * FROM worker WHERE id = ANY(ARRAY[${workerInCurrentTeamIds}]);
               `)
-            console.log(4)
 
-            const leaderWorker = await pool.query(`
-                SELECT * FROM worker WHERE id = ${team.rows[0].leader_id}
+            const leader = await pool.query(`
+              SELECT * FROM leader WHERE id = ${team.rows[0].leader_id};
               `)
-            console.log(6)
+
+            const workerLeader = await pool.query(`
+                SELECT * FROM worker WHERE id = ${leader.rows[0].worker_id}
+              `)
             const workersMail = workers.rows.map((worker) => worker.email)
             const workersChatId = workers.rows
-              .filter((worker) => worker.id !== leaderWorker.rows[0].id)
+              .filter((worker) => worker.id !== workerLeader.rows[0].id)
               .map((worker) => worker.chat_id)
 
             sendMail(workersMail, state, team)
 
             try {
               await bot.sendMessage(
-                leaderWorker.rows[0].chat_id,
+                worker.rows[0].chat_id,
                 `${
-                  +leaderWorker.rows[0].chat_id === +chatId
+                  +worker.rows[0].chat_id === +chatId
                     ? 'Вы создали новое собрание.'
                     : 'Ваш сотрудник создал новое собрание'
                 } 
@@ -195,8 +198,6 @@ const messageHandler = (bot) => {
 
             for (const workerChatId of workersChatId) {
               try {
-                console.log(+workerChatId, +chatId)
-
                 await bot.sendMessage(
                   workerChatId,
                   `${
@@ -257,8 +258,6 @@ const messageHandler = (bot) => {
               `)
 
             const workerMarkMap = workersInTeam.rows.reduce((acc, val) => {
-              console.log(val)
-
               if (val.worker_id === worker.rows[0].id) {
                 return acc
               }
@@ -478,9 +477,17 @@ const messageHandler = (bot) => {
               (workerTeamRole) => workerTeamRole.worker_id
             )
 
-            const leaderWorker = await pool.query(`
-              SELECT * FROM worker WHERE id = ${teamId}
+            const team = await pool.query(`
+              SELECT * FROM team WHERE id = ${teamId}
             `)
+
+            const leader = await pool.query(`
+              SELECT * FROM leader WHERE id = ${team.rows[0].leader_id};
+              `)
+
+            const workerLeader = await pool.query(`
+              SELECT * FROM worker WHERE id = ${leader.rows[0].worker_id};
+              `)
 
             const workers = await pool.query(`
               SELECT * FROM worker WHERE id = ANY(ARRAY[${workerInCurrentTeamIds}]);
@@ -503,7 +510,7 @@ const messageHandler = (bot) => {
               {
                 reply_markup: JSON.stringify({
                   inline_keyboard: workers.rows
-                    .filter((worker) => worker.id !== leaderWorker.rows[0].id)
+                    .filter((worker) => worker.id !== workerLeader.rows[0].id)
                     .map((worker) => {
                       return [
                         {

@@ -8,7 +8,6 @@ const start = (bot) => {
   bot.onText('/start', async (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username
-    console.log(chatId, username)
 
     const worker = await selectWorkerByUsername(username)
 

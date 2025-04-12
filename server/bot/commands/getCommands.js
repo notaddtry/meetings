@@ -13,7 +13,7 @@ const getCommands = (bot) => {
       /get_meetings - Получить список актуальных собраний;
       /set_mark - Выставить отметку о возможности прийти на собрание;
       /add_member_to_team - Добавить сотрудника в команду;
-      /change_worker_role
+      /change_worker_role - Изменить роль участника
       `
     )
   })

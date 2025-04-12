@@ -38,8 +38,12 @@ const getInfoMeeting = (bot) => {
       )
     }
 
+    const leader = await pool.query(`
+      SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
+      `)
+
     const teamsUnderCurrentLeader = await pool.query(`
-      SELECT * FROM team WHERE leader_id = ${worker.rows[0].id};
+      SELECT * FROM team WHERE leader_id = ${leader.rows[0].id};
       `)
 
     const teamsId = teamsUnderCurrentLeader.rows.map((row) => row.id)

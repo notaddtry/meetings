@@ -99,13 +99,14 @@ DROP TABLE IF EXISTS meeting_worker_relationship CASCADE;
 
 CREATE OR REPLACE FUNCTION create_team_function(
     in_title VARCHAR(255),
-    in_leader_id INT
+    in_worker_id INT
 ) RETURNS INT AS
 
 $$
 DECLARE
     new_team_id INT;
     leader_role_id INT;
+    new_leader_id INT;
 BEGIN
     SELECT id INTO leader_role_id
     FROM role
@@ -114,13 +115,13 @@ BEGIN
 
     INSERT INTO leader(worker_id)
     VALUES
-    (in_leader_id);
+    (in_worker_id) RETURNING id INTO new_leader_id;
     INSERT INTO team(title, leader_id)
-    VALUES(in_title, in_leader_id)
+    VALUES(in_title, new_leader_id)
     RETURNING id INTO new_team_id;
 
     INSERT INTO worker_team_role(worker_id, team_id, role_id)
-    VALUES(in_leader_id, new_team_id, leader_role_id);
+    VALUES(in_worker_id, new_team_id, leader_role_id);
 
     RETURN new_team_id;
 END;
@@ -188,10 +189,6 @@ INSERT INTO worker(username, email, chat_id)
 VALUES
 ('meeting_test_1', 'comatose9999@proton.me', 7632038593),
 ('meeting_test_2', 'comatose6666@proton.me', 7636404014);
- 
-INSERT INTO leader(worker_id)
-VALUES
-((SELECT id FROM worker WHERE username = 'meeting_test_1'));
 
 INSERT INTO role(title)
 VALUES
@@ -217,7 +214,7 @@ VALUES
 ((SELECT id FROM role WHERE title = 'Responsible'), (SELECT id FROM access_rights WHERE title = 'See meetings')),
 ((SELECT id FROM role WHERE title = 'Worker'), (SELECT id FROM access_rights WHERE title = 'See meetings'));
 
-SELECT create_team_function('Development Team', (SELECT id FROM leader WHERE worker_id = (SELECT id FROM worker WHERE username = 'meeting_test_1'))) AS team_id;
+SELECT create_team_function('Development Team', (SELECT id FROM worker WHERE username = 'meeting_test_1')) AS team_id;
 
 SELECT add_worker_to_team((SELECT id FROM team WHERE title = 'Development Team'), (SELECT id FROM worker WHERE username = 'meeting_test_2'), (SELECT id FROM role WHERE title = 'Worker'));
 

@@ -29,11 +29,13 @@ const changeWorkerRole = (bot) => {
       )
     }
 
-    const teams = await pool.query(`
-      SELECT * FROM team WHERE leader_id = '${worker.rows[0].id}';
+    const leader = await pool.query(`
+      SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
       `)
 
-    //
+    const teams = await pool.query(`
+      SELECT * FROM team WHERE leader_id = '${leader.rows[0].id}';
+      `)
 
     try {
       await setUserState(chatId, {

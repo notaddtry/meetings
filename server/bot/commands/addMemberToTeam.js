@@ -28,8 +28,12 @@ const addMemberToTeam = (bot) => {
       )
     }
 
+    const workerLeader = await pool.query(`
+      SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
+      `)
+
     const teams = await pool.query(`
-      SELECT * FROM team WHERE leader_id = '${worker.rows[0].id}';
+      SELECT * FROM team WHERE leader_id = '${workerLeader.rows[0].id}';
       `)
 
     await bot.sendMessage(

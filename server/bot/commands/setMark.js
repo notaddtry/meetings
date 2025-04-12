@@ -38,8 +38,12 @@ const setMark = (bot) => {
       SELECT * FROM team WHERE id = ANY(ARRAY[${teamsIds}]);
       `)
 
+    const leader = await pool.query(`
+        SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
+        `)
+
     const teamsWithLeaderCheck = teams.rows.filter(
-      (team) => team.leader_id !== worker.rows[0].id
+      (team) => team.leader_id !== leader.rows[0].id
     )
 
     if (!teamsWithLeaderCheck.length) {

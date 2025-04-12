@@ -29,8 +29,6 @@ async function generateDocument(workerMarkMap, workers) {
   Object.keys(workerMarkMap).map((id) => {
     const worker = workers.rows.find((worker) => worker.id === +id)
 
-    console.log(workerMarkMap, workers.rows, id)
-
     pObj = docx.createP()
 
     pObj.addText(
