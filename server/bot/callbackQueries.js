@@ -169,6 +169,58 @@ const callbackQueriesInit = (bot) => {
       }!`
 
       await clearUserState(msg.chat.id)
+    } else if (action.includes('docx') || action.includes('json')) {
+      const worker = await selectWorkerByUsername(username)
+
+      const isWorkerLeader = await pool.query(`
+        SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
+        `)
+
+      if (!isWorkerLeader.rows.length) {
+        return await bot.sendMessage(
+          chatId,
+          'Вы не являетесь руководителем команды. Создайте команду,чтобы добавлять в нее участников.'
+        )
+      }
+
+      const leader = await pool.query(`
+        SELECT * FROM leader WHERE worker_id = ${worker.rows[0].id};
+        `)
+
+      const teamsUnderCurrentLeader = await pool.query(`
+        SELECT * FROM team WHERE leader_id = ${leader.rows[0].id};
+        `)
+
+      const teamsId = teamsUnderCurrentLeader.rows.map((row) => row.id)
+
+      const meetings = await pool.query(`
+        SELECT * FROM meeting WHERE team_id = ANY(ARRAY[${teamsId}]);
+       `)
+
+      try {
+        await setUserState(msg.chat.id, {
+          ...state,
+          exportType: action,
+          action: 'infoMeeting',
+          status: 'waitingForSelectMeeting',
+        })
+      } catch (err) {
+        console.error('Ошибка при вызове setUserState:', err)
+        return
+      }
+
+      text = `Укажите идентификатор собрания,по которому хотите получить отчет. Вот список всех собраний,которые назначены на Ваши команды
+  
+        ${meetings.rows
+          .map((meeting) => {
+            return `    Идентификатор встречи: ${meeting.id}
+        Дата встречи: ${new Date(meeting.date).toLocaleDateString()}
+        Тип встречи: ${
+          meeting.type === 'Online' ? 'Онлайн-формат' : 'Оффлайн-формат'
+        }`
+          })
+          .join('\n\n')}
+        `
     }
 
     bot.editMessageText(text, opts)

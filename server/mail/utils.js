@@ -2,7 +2,7 @@ const transport = require('./index.js')
 
 const sendMail = (workersMail, state, team) => {
   const message = {
-    from: '"Уведомление от бота" <comatose.6666@gmail.com>',
+    from: '"Уведомление от бота" <comatose.9999@mail.ru>',
 
     to: workersMail.join(', '),
 

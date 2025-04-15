@@ -61,10 +61,12 @@ const messageHandler = (bot) => {
               )
             }
 
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
+
             await setUserState(chatId, {
               action: 'meeting',
               status: 'waitingForMeetingType',
-              date: date,
+              date,
             })
 
             await bot.sendMessage(
@@ -249,6 +251,10 @@ const messageHandler = (bot) => {
               'team'
             )
 
+            const team = await pool.query(`
+              SELECT * FROM team WHERE id = ${meeting.rows[0].team_id}
+              `)
+
             const workersInTeamId = workersInTeam.rows.map(
               (worker) => worker.worker_id
             )
@@ -283,7 +289,13 @@ const messageHandler = (bot) => {
               'Произошла ошибка при отправке документа. Попробуйте позже.'
 
             try {
-              generateDocument(workerMarkMap, workers)
+              generateDocument(
+                workerMarkMap,
+                workers,
+                state.exportType,
+                meeting.rows[0],
+                team.rows[0]
+              )
                 .then(() => {
                   bot.sendMessage(chatId, 'Отчет готовится, ожидайте.')
                   //TODO REFACTORING
@@ -291,11 +303,17 @@ const messageHandler = (bot) => {
                     bot
                       .sendDocument(
                         chatId,
-                        path.join(__dirname, '../../example.docx')
+                        path.join(
+                          __dirname,
+                          `../../example.${state.exportType}`
+                        )
                       )
                       .then(() => {
                         fs.unlinkSync(
-                          path.join(__dirname, '../../example.docx')
+                          path.join(
+                            __dirname,
+                            `../../example.${state.exportType}`
+                          )
                         )
                       })
                       .catch((error) => {
